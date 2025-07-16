@@ -19,6 +19,12 @@ public class Book {
     private String description;
     private Timestamp createdAt;
     
+    // New SPK criteria fields
+    private int borrowerCount;      // Jumlah Peminjam
+    private String bookCondition;   // Kondisi Fisik Buku
+    private String contentRelevance; // Relevansi Isi Buku
+    private int loanDuration;       // Durasi Peminjaman (dalam hari)
+    
     public Book() {}
     
     public Book(String title, String author, String category, String publisher, 
@@ -50,6 +56,29 @@ public class Book {
         this.isbn = isbn;
         this.description = description;
         this.createdAt = createdAt;
+    }
+    
+    // New constructor with SPK criteria
+    public Book(int id, String title, String author, String category, String publisher,
+                int year, int pages, double rating, double price, String isbn, 
+                String description, Timestamp createdAt, int borrowerCount, 
+                String bookCondition, String contentRelevance, int loanDuration) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+        this.category = category;
+        this.publisher = publisher;
+        this.year = year;
+        this.pages = pages;
+        this.rating = rating;
+        this.price = price;
+        this.isbn = isbn;
+        this.description = description;
+        this.createdAt = createdAt;
+        this.borrowerCount = borrowerCount;
+        this.bookCondition = bookCondition;
+        this.contentRelevance = contentRelevance;
+        this.loanDuration = loanDuration;
     }
     
     // Getters and Setters
@@ -89,6 +118,19 @@ public class Book {
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
     
+    // New SPK criteria getters and setters
+    public int getBorrowerCount() { return borrowerCount; }
+    public void setBorrowerCount(int borrowerCount) { this.borrowerCount = borrowerCount; }
+    
+    public String getBookCondition() { return bookCondition; }
+    public void setBookCondition(String bookCondition) { this.bookCondition = bookCondition; }
+    
+    public String getContentRelevance() { return contentRelevance; }
+    public void setContentRelevance(String contentRelevance) { this.contentRelevance = contentRelevance; }
+    
+    public int getLoanDuration() { return loanDuration; }
+    public void setLoanDuration(int loanDuration) { this.loanDuration = loanDuration; }
+    
     @Override
     public String toString() {
         return "Book{" +
@@ -98,6 +140,10 @@ public class Book {
                 ", category='" + category + '\'' +
                 ", rating=" + rating +
                 ", price=" + price +
+                ", borrowerCount=" + borrowerCount +
+                ", bookCondition='" + bookCondition + '\'' +
+                ", contentRelevance='" + contentRelevance + '\'' +
+                ", loanDuration=" + loanDuration +
                 '}';
     }
 } 

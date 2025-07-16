@@ -84,13 +84,6 @@ if [ ! -f "setup_database.sql" ]; then
     exit 1
 fi
 
-# Check if test_database.sql exists
-if [ ! -f "test_database.sql" ]; then
-    echo -e "${RED}❌ test_database.sql not found${NC}"
-    echo -e "${YELLOW}Please ensure test_database.sql is in the current directory${NC}"
-    exit 1
-fi
-
 # Try to run setup_database.sql
 echo -e "${BLUE}📊 Setting up database schema and sample data...${NC}"
 if mysql -u root < setup_database.sql 2>/dev/null; then
@@ -107,15 +100,6 @@ else
         echo -e "${YELLOW}The application will try to connect with default settings${NC}"
         echo -e "${YELLOW}You may need to manually run setup_database.sql${NC}"
     fi
-fi
-
-# Test database setup
-echo -e "${BLUE}🧪 Testing database setup...${NC}"
-if mysql -u root < test_database.sql 2>/dev/null; then
-    echo -e "${GREEN}✅ Database test completed successfully${NC}"
-else
-    echo -e "${YELLOW}⚠️  Could not run test_database.sql${NC}"
-    echo -e "${YELLOW}Database setup may not be complete${NC}"
 fi
 
 # Run the application

@@ -6,6 +6,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 /**
@@ -147,8 +149,8 @@ public class BookSelectionFrame extends JFrame {
         filterPanel.add(categoryComboBox);
         filterPanel.add(refreshButton);
         
-        // Table
-        String[] columnNames = {"Title", "Author", "Category", "Publisher", "Year", "Pages", "Rating", "Price", "ISBN"};
+        // Table with new SPK criteria columns
+        String[] columnNames = {"Title", "Author", "Category", "Publisher", "Year", "Pages", "Rating", "Price", "ISBN", "Borrower Count", "Book Condition", "Content Relevance", "Loan Duration"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -163,6 +165,19 @@ public class BookSelectionFrame extends JFrame {
         bookTable.setSelectionBackground(ColorPalette.PRIMARY_BLUE);
         bookTable.setSelectionForeground(Color.WHITE);
         
+        // Add mouse listener for row selection to show book details
+        bookTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() == 1) { // Single click
+                    int row = bookTable.getSelectedRow();
+                    if (row >= 0) {
+                        showBookDetailsModal(row);
+                    }
+                }
+            }
+        });
+        
         // Add category filter listener
         categoryComboBox.addActionListener(e -> loadBooks());
         
@@ -175,7 +190,205 @@ public class BookSelectionFrame extends JFrame {
         return panel;
     }
     
-
+    private void showBookDetailsModal(int row) {
+        // Get book data from table
+        String title = (String) tableModel.getValueAt(row, 0);
+        String author = (String) tableModel.getValueAt(row, 1);
+        
+        // Find book by title and author
+        Book book = bookDAO.getBookByTitleAndAuthor(title, author);
+        if (book == null) {
+            JOptionPane.showMessageDialog(this, "Could not find book details", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Create modal dialog
+        JDialog modal = new JDialog(this, "Book Details", true);
+        modal.setLayout(new BorderLayout());
+        modal.setSize(700, 600);
+        modal.setLocationRelativeTo(this);
+        modal.setResizable(false);
+        
+        // Main panel with gradient background
+        JPanel mainPanel = new GradientPanel(ColorPalette.getBackgroundGradient());
+        mainPanel.setLayout(new BorderLayout());
+        mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        
+        // Header panel
+        JPanel headerPanel = new GradientPanel(ColorPalette.getCardGradient());
+        headerPanel.setLayout(new BorderLayout());
+        headerPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ColorPalette.BORDER_PRIMARY, 1),
+            new EmptyBorder(15, 20, 15, 20)
+        ));
+        
+        JLabel titleLabel = new JLabel("Book Details");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
+        
+        JButton closeButton = new GradientButton("Close", ColorPalette.PRIMARY_GRAY, ColorPalette.SECONDARY_GRAY);
+        closeButton.setPreferredSize(new Dimension(100, 35));
+        closeButton.addActionListener(e -> modal.dispose());
+        
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+        headerPanel.add(closeButton, BorderLayout.EAST);
+        
+        // Content panel
+        JPanel contentPanel = new GradientPanel(ColorPalette.getCardGradient());
+        contentPanel.setLayout(new BorderLayout());
+        contentPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ColorPalette.BORDER_PRIMARY, 1),
+            new EmptyBorder(20, 20, 20, 20)
+        ));
+        
+        // Create scrollable content
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
+        
+        JPanel detailsPanel = createBookDetailsPanel(book);
+        scrollPane.setViewportView(detailsPanel);
+        
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+        
+        modal.add(mainPanel);
+        modal.setVisible(true);
+    }
+    
+    private JPanel createBookDetailsPanel(Book book) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
+        panel.setOpaque(false);
+        panel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+        
+        // Basic Information Section
+        JLabel basicTitleLabel = new JLabel("Basic Information");
+        basicTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        basicTitleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(15, 8, 20, 8);
+        panel.add(basicTitleLabel, gbc);
+        
+        // Title
+        addDetailField(panel, "Title:", book.getTitle(), gbc, 1);
+        
+        // Author
+        addDetailField(panel, "Author:", book.getAuthor(), gbc, 2);
+        
+        // Category
+        addDetailField(panel, "Category:", book.getCategory(), gbc, 3);
+        
+        // Publisher
+        addDetailField(panel, "Publisher:", book.getPublisher(), gbc, 4);
+        
+        // Year
+        addDetailField(panel, "Year:", String.valueOf(book.getYear()), gbc, 5);
+        
+        // Pages
+        addDetailField(panel, "Pages:", String.valueOf(book.getPages()), gbc, 6);
+        
+        // Rating
+        addDetailField(panel, "Rating:", String.format("%.1f", book.getRating()), gbc, 7);
+        
+        // Price
+        addDetailField(panel, "Price:", String.format("Rp %.0f", book.getPrice()), gbc, 8);
+        
+        // ISBN
+        addDetailField(panel, "ISBN:", book.getIsbn(), gbc, 9);
+        
+        // SPK Criteria Section
+        JLabel spkTitleLabel = new JLabel("SPK Criteria");
+        spkTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        spkTitleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
+        gbc.gridx = 0;
+        gbc.gridy = 10;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(25, 8, 20, 8);
+        panel.add(spkTitleLabel, gbc);
+        
+        // Borrower Count
+        addDetailField(panel, "Jumlah Peminjam:", String.valueOf(book.getBorrowerCount()), gbc, 11);
+        
+        // Book Condition
+        addDetailField(panel, "Kondisi Fisik Buku:", book.getBookCondition(), gbc, 12);
+        
+        // Content Relevance
+        addDetailField(panel, "Relevansi Isi Buku:", book.getContentRelevance(), gbc, 13);
+        
+        // Loan Duration
+        addDetailField(panel, "Durasi Peminjaman:", book.getLoanDuration() + " hari", gbc, 14);
+        
+        // Description Section
+        JLabel descTitleLabel = new JLabel("Description");
+        descTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        descTitleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
+        gbc.gridx = 0;
+        gbc.gridy = 15;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(25, 8, 20, 8);
+        panel.add(descTitleLabel, gbc);
+        
+        // Description text area with proper sizing
+        JTextArea descArea = new JTextArea(book.getDescription());
+        descArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        descArea.setLineWrap(true);
+        descArea.setWrapStyleWord(true);
+        descArea.setEditable(false);
+        descArea.setBackground(ColorPalette.CARD_BACKGROUND);
+        descArea.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ColorPalette.BORDER_PRIMARY, 1),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
+        
+        // Set preferred size to use full width
+        descArea.setPreferredSize(new Dimension(550, 120));
+        descArea.setMinimumSize(new Dimension(550, 120));
+        
+        gbc.gridx = 0;
+        gbc.gridy = 16;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.insets = new Insets(5, 8, 15, 8);
+        panel.add(descArea, gbc);
+        
+        return panel;
+    }
+    
+    private void addDetailField(JPanel panel, String label, String value, GridBagConstraints gbc, int row) {
+        JLabel labelComponent = new JLabel(label);
+        labelComponent.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        labelComponent.setForeground(ColorPalette.TEXT_PRIMARY);
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 0.3;
+        gbc.weighty = 0.0;
+        gbc.insets = new Insets(5, 8, 5, 8);
+        panel.add(labelComponent, gbc);
+        
+        JLabel valueComponent = new JLabel(value);
+        valueComponent.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        valueComponent.setForeground(ColorPalette.TEXT_SECONDARY);
+        gbc.gridx = 1;
+        gbc.gridy = row;
+        gbc.gridwidth = 1;
+        gbc.weightx = 0.7;
+        panel.add(valueComponent, gbc);
+    }
     
     private void loadBooks() {
         tableModel.setRowCount(0);
@@ -199,7 +412,11 @@ public class BookSelectionFrame extends JFrame {
                 book.getPages(),
                 String.format("%.1f", book.getRating()),
                 String.format("Rp %.0f", book.getPrice()),
-                book.getIsbn()
+                book.getIsbn(),
+                book.getBorrowerCount(),
+                book.getBookCondition(),
+                book.getContentRelevance(),
+                book.getLoanDuration() + " hari"
             };
             tableModel.addRow(row);
         }
@@ -216,23 +433,22 @@ public class BookSelectionFrame extends JFrame {
     }
     
     private void openEditProfileFrame() {
-        EditProfileFrame editFrame = new EditProfileFrame(currentUser);
-        editFrame.setVisible(true);
+        EditProfileFrame editProfileFrame = new EditProfileFrame(currentUser);
+        editProfileFrame.setVisible(true);
     }
     
     private void logout() {
-        int choice = JOptionPane.showConfirmDialog(
+        int result = JOptionPane.showConfirmDialog(
             this,
             "Are you sure you want to logout?",
             "Confirm Logout",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE
+            JOptionPane.YES_NO_OPTION
         );
         
-        if (choice == JOptionPane.YES_OPTION) {
+        if (result == JOptionPane.YES_OPTION) {
+            dispose();
             LoginFrame loginFrame = new LoginFrame();
             loginFrame.setVisible(true);
-            this.dispose();
         }
     }
     

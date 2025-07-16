@@ -17,13 +17,20 @@ import java.util.List;
  */
 public class SPKFrame extends JFrame {
     private BookDAO bookDAO;
-    private JSlider ratingSlider, priceSlider, yearSlider, pagesSlider;
+    private JSlider borrowerCountSlider, bookConditionSlider, contentRelevanceSlider, loanDurationSlider;
     private JLabel spkResultLabel;
     private JPanel spkPanel;
     private JButton calculateButton;
     private JButton backButton;
+    private JButton toggleCriteriaButton;
     private JTable spkTable;
     private DefaultTableModel spkTableModel;
+    private JSplitPane splitPane;
+    private JScrollPane criteriaScrollPane;
+    private boolean criteriaVisible = true;
+    
+    // Result count selection
+    private JComboBox<Integer> resultCountCombo;
     
     public SPKFrame(BookDAO bookDAO) {
         this.bookDAO = bookDAO;
@@ -72,12 +79,23 @@ public class SPKFrame extends JFrame {
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         
+        // Button panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        buttonPanel.setOpaque(false);
+        
+        toggleCriteriaButton = new GradientButton("Hide SPK Criteria", ColorPalette.PRIMARY_ORANGE, ColorPalette.SECONDARY_ORANGE);
+        toggleCriteriaButton.setPreferredSize(new Dimension(150, 35));
+        toggleCriteriaButton.addActionListener(e -> toggleCriteriaPanel());
+        
         backButton = new GradientButton("Back", ColorPalette.PRIMARY_GRAY, ColorPalette.SECONDARY_GRAY);
         backButton.setPreferredSize(new Dimension(100, 35));
         backButton.addActionListener(e -> dispose());
         
+        buttonPanel.add(toggleCriteriaButton);
+        buttonPanel.add(backButton);
+        
         headerPanel.add(titleLabel, BorderLayout.WEST);
-        headerPanel.add(backButton, BorderLayout.EAST);
+        headerPanel.add(buttonPanel, BorderLayout.EAST);
         
         return headerPanel;
     }
@@ -88,13 +106,18 @@ public class SPKFrame extends JFrame {
         contentPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
         
         // Create split pane for left-right layout
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setDividerSize(5);
         splitPane.setBorder(null);
         
-        // Left Panel - Criteria
+        // Left Panel - Criteria with scroll pane
         JPanel criteriaPanel = createCriteriaPanel();
-        splitPane.setLeftComponent(criteriaPanel);
+        criteriaScrollPane = new JScrollPane(criteriaPanel);
+        criteriaScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        criteriaScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        criteriaScrollPane.setBorder(BorderFactory.createLineBorder(ColorPalette.BORDER_PRIMARY, 1));
+        criteriaScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        splitPane.setLeftComponent(criteriaScrollPane);
         
         // Right Panel - Results
         spkPanel = createResultsPanel();
@@ -116,6 +139,29 @@ public class SPKFrame extends JFrame {
         return contentPanel;
     }
     
+    private void toggleCriteriaPanel() {
+        if (criteriaVisible) {
+            // Hide criteria panel
+            splitPane.setLeftComponent(null);
+            toggleCriteriaButton.setText("Show SPK Criteria");
+            criteriaVisible = false;
+        } else {
+            // Show criteria panel
+            splitPane.setLeftComponent(criteriaScrollPane);
+            toggleCriteriaButton.setText("Hide SPK Criteria");
+            criteriaVisible = true;
+            
+            // Reset divider location
+            SwingUtilities.invokeLater(() -> {
+                splitPane.setDividerLocation(0.5);
+            });
+        }
+        
+        // Revalidate and repaint
+        splitPane.revalidate();
+        splitPane.repaint();
+    }
+    
     private JPanel createCriteriaPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
@@ -130,7 +176,7 @@ public class SPKFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         
         // Title
-        JLabel titleLabel = new JLabel("Set Criteria Weights");
+        JLabel titleLabel = new JLabel("Set SPK Criteria Weights");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
@@ -139,91 +185,95 @@ public class SPKFrame extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         panel.add(titleLabel, gbc);
         
-        // Rating Slider
-        JLabel ratingLabel = new JLabel("Rating (0-5):");
-        ratingLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        ratingLabel.setForeground(ColorPalette.TEXT_PRIMARY);
+        // Jumlah Peminjam Slider
+        JLabel borrowerCountLabel = new JLabel("Jumlah Peminjam (1-100):");
+        borrowerCountLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        borrowerCountLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(ratingLabel, gbc);
+        panel.add(borrowerCountLabel, gbc);
         
-        ratingSlider = new JSlider(0, 5, 3);
-        ratingSlider.setMajorTickSpacing(1);
-        ratingSlider.setPaintTicks(true);
-        ratingSlider.setPaintLabels(true);
-        ratingSlider.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        ratingSlider.setPreferredSize(new Dimension(350, 50));
+        borrowerCountSlider = new JSlider(1, 100, 50);
+        borrowerCountSlider.setMajorTickSpacing(20);
+        borrowerCountSlider.setPaintTicks(true);
+        borrowerCountSlider.setPaintLabels(true);
+        borrowerCountSlider.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        borrowerCountSlider.setPreferredSize(new Dimension(350, 50));
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.CENTER;
-        panel.add(ratingSlider, gbc);
+        panel.add(borrowerCountSlider, gbc);
         
-        // Price Slider
-        JLabel priceLabel = new JLabel("Price (0-1M):");
-        priceLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        priceLabel.setForeground(ColorPalette.TEXT_PRIMARY);
+        // Kondisi Fisik Buku Slider
+        JLabel bookConditionLabel = new JLabel("Kondisi Fisik Buku (1-5):");
+        bookConditionLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        bookConditionLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(priceLabel, gbc);
+        panel.add(bookConditionLabel, gbc);
         
-        priceSlider = new JSlider(0, 1000000, 500000);
-        priceSlider.setMajorTickSpacing(200000);
-        priceSlider.setPaintTicks(true);
-        priceSlider.setPaintLabels(true);
-        priceSlider.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        priceSlider.setPreferredSize(new Dimension(350, 50));
+        bookConditionSlider = new JSlider(1, 5, 3);
+        bookConditionSlider.setMajorTickSpacing(1);
+        bookConditionSlider.setPaintTicks(true);
+        bookConditionSlider.setPaintLabels(true);
+        bookConditionSlider.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        bookConditionSlider.setPreferredSize(new Dimension(350, 50));
         gbc.gridx = 1;
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.CENTER;
-        panel.add(priceSlider, gbc);
+        panel.add(bookConditionSlider, gbc);
         
-        // Year Slider
-        JLabel yearLabel = new JLabel("Year (1900-2024):");
-        yearLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        yearLabel.setForeground(ColorPalette.TEXT_PRIMARY);
+        // Relevansi Isi Buku Slider
+        JLabel contentRelevanceLabel = new JLabel("Relevansi Isi Buku (1-5):");
+        contentRelevanceLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        contentRelevanceLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(yearLabel, gbc);
+        panel.add(contentRelevanceLabel, gbc);
         
-        yearSlider = new JSlider(1900, 2024, 2020);
-        yearSlider.setMajorTickSpacing(20);
-        yearSlider.setPaintTicks(true);
-        yearSlider.setPaintLabels(true);
-        yearSlider.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        yearSlider.setPreferredSize(new Dimension(350, 50));
+        contentRelevanceSlider = new JSlider(1, 5, 3);
+        contentRelevanceSlider.setMajorTickSpacing(1);
+        contentRelevanceSlider.setPaintTicks(true);
+        contentRelevanceSlider.setPaintLabels(true);
+        contentRelevanceSlider.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        contentRelevanceSlider.setPreferredSize(new Dimension(350, 50));
         gbc.gridx = 1;
         gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.CENTER;
-        panel.add(yearSlider, gbc);
+        panel.add(contentRelevanceSlider, gbc);
         
-        // Pages Slider
-        JLabel pagesLabel = new JLabel("Pages (0-1000):");
-        pagesLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        pagesLabel.setForeground(ColorPalette.TEXT_PRIMARY);
+        // Durasi Peminjaman Slider
+        JLabel loanDurationLabel = new JLabel("Durasi Peminjaman (1-5):");
+        loanDurationLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        loanDurationLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.anchor = GridBagConstraints.WEST;
-        panel.add(pagesLabel, gbc);
+        panel.add(loanDurationLabel, gbc);
         
-        pagesSlider = new JSlider(0, 1000, 300);
-        pagesSlider.setMajorTickSpacing(200);
-        pagesSlider.setPaintTicks(true);
-        pagesSlider.setPaintLabels(true);
-        pagesSlider.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        pagesSlider.setPreferredSize(new Dimension(350, 50));
+        loanDurationSlider = new JSlider(1, 5, 3);
+        loanDurationSlider.setMajorTickSpacing(1);
+        loanDurationSlider.setPaintTicks(true);
+        loanDurationSlider.setPaintLabels(true);
+        loanDurationSlider.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        loanDurationSlider.setPreferredSize(new Dimension(350, 50));
         gbc.gridx = 1;
         gbc.gridy = 4;
         gbc.anchor = GridBagConstraints.CENTER;
-        panel.add(pagesSlider, gbc);
+        panel.add(loanDurationSlider, gbc);
         
         // Calculate Button
         calculateButton = new GradientButton("Calculate SPK", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
         calculateButton.setPreferredSize(new Dimension(220, 50));
-        calculateButton.addActionListener(e -> calculateSPK());
+        calculateButton.addActionListener(e -> {
+            // Get the selected count from combo box and pass it to calculateSPK
+            Integer selectedCount = (Integer) resultCountCombo.getSelectedItem();
+            calculateSPK(selectedCount != null ? selectedCount : 5);
+        });
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.gridwidth = 2;
@@ -259,14 +309,20 @@ public class SPKFrame extends JFrame {
         filterLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         filterLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         
-        JComboBox<Integer> resultCountCombo = new JComboBox<>(new Integer[]{3, 5, 10, 15, 20});
+        // Create combo box with more options up to 100
+        Integer[] resultCountOptions = {3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100};
+        resultCountCombo = new JComboBox<>(resultCountOptions);
         resultCountCombo.setSelectedItem(5);
         resultCountCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         resultCountCombo.setPreferredSize(new Dimension(80, 30));
         
         JButton refreshButton = new GradientButton("Refresh", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
         refreshButton.setPreferredSize(new Dimension(100, 30));
-        refreshButton.addActionListener(e -> calculateSPK());
+        refreshButton.addActionListener(e -> {
+            // Get the selected count from combo box and pass it to calculateSPK
+            Integer selectedCount = (Integer) resultCountCombo.getSelectedItem();
+            calculateSPK(selectedCount != null ? selectedCount : 5);
+        });
         
         filterPanel.add(filterLabel);
         filterPanel.add(resultCountCombo);
@@ -275,8 +331,8 @@ public class SPKFrame extends JFrame {
         topPanel.add(titleLabel, BorderLayout.WEST);
         topPanel.add(filterPanel, BorderLayout.EAST);
         
-        // Results table
-        String[] columnNames = {"Rank", "Title", "Author", "Category", "Rating", "Price", "Year", "Pages", "SPK Score"};
+        // Results table with new SPK criteria columns
+        String[] columnNames = {"Rank", "Title", "Author", "Category", "Borrower Count", "Book Condition", "Content Relevance", "Loan Duration", "SPK Score"};
         spkTableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -292,19 +348,19 @@ public class SPKFrame extends JFrame {
         spkTable.setSelectionForeground(Color.WHITE);
         
         // Set column widths
-        spkTable.getColumnModel().getColumn(0).setPreferredWidth(50);  // Rank
-        spkTable.getColumnModel().getColumn(1).setPreferredWidth(200); // Title
-        spkTable.getColumnModel().getColumn(2).setPreferredWidth(120); // Author
-        spkTable.getColumnModel().getColumn(3).setPreferredWidth(100); // Category
-        spkTable.getColumnModel().getColumn(4).setPreferredWidth(60);  // Rating
-        spkTable.getColumnModel().getColumn(5).setPreferredWidth(100); // Price
-        spkTable.getColumnModel().getColumn(6).setPreferredWidth(60);  // Year
-        spkTable.getColumnModel().getColumn(7).setPreferredWidth(60);  // Pages
-        spkTable.getColumnModel().getColumn(8).setPreferredWidth(100); // SPK Score
+        spkTable.getColumnModel().getColumn(0).setPreferredWidth(50);   // Rank
+        spkTable.getColumnModel().getColumn(1).setPreferredWidth(200);  // Title
+        spkTable.getColumnModel().getColumn(2).setPreferredWidth(120);  // Author
+        spkTable.getColumnModel().getColumn(3).setPreferredWidth(100);  // Category
+        spkTable.getColumnModel().getColumn(4).setPreferredWidth(100);  // Borrower Count
+        spkTable.getColumnModel().getColumn(5).setPreferredWidth(120);  // Book Condition
+        spkTable.getColumnModel().getColumn(6).setPreferredWidth(120);  // Content Relevance
+        spkTable.getColumnModel().getColumn(7).setPreferredWidth(100);  // Loan Duration
+        spkTable.getColumnModel().getColumn(8).setPreferredWidth(100);  // SPK Score
         
         JScrollPane scrollPane = new JScrollPane(spkTable);
         scrollPane.setBorder(BorderFactory.createLineBorder(ColorPalette.BORDER_PRIMARY, 1));
-        scrollPane.setPreferredSize(new Dimension(700, 500));
+        scrollPane.setPreferredSize(new Dimension(900, 500));
         
         // Status label
         spkResultLabel = new JLabel("Click 'Calculate SPK' to see results");
@@ -320,16 +376,20 @@ public class SPKFrame extends JFrame {
     }
     
     private void calculateSPK() {
-        // Get weights from sliders
-        double ratingWeight = ratingSlider.getValue() / 5.0;
-        double priceWeight = (1000000 - priceSlider.getValue()) / 1000000.0;
-        double yearWeight = (yearSlider.getValue() - 1900) / (2024 - 1900);
-        double pagesWeight = pagesSlider.getValue() / 1000.0;
+        // Default to 5 if no parameter provided (for backward compatibility)
+        calculateSPK(5);
+    }
+    
+    private void calculateSPK(int resultCount) {
+        // Get weights from sliders for new SPK criteria
+        double borrowerCountWeight = borrowerCountSlider.getValue() / 100.0;
+        double bookConditionWeight = bookConditionSlider.getValue() / 5.0;
+        double contentRelevanceWeight = contentRelevanceSlider.getValue() / 5.0;
+        double loanDurationWeight = loanDurationSlider.getValue() / 5.0;
         
-        double[] weights = {ratingWeight, priceWeight, yearWeight, pagesWeight};
+        double[] weights = {borrowerCountWeight, bookConditionWeight, contentRelevanceWeight, loanDurationWeight};
         
-        // Get top books using SPK (default 5, can be changed by filter)
-        int resultCount = 5; // Default value
+        // Get top books using SPK with the specified result count
         List<BookDAO.BookSPKResult> topBooks = bookDAO.getTopBooksSPK(resultCount, weights);
         
         // Clear existing table data
@@ -346,10 +406,10 @@ public class SPKFrame extends JFrame {
                 book.getTitle(),
                 book.getAuthor(),
                 book.getCategory(),
-                String.format("%.1f", book.getRating()),
-                String.format("Rp %.0f", book.getPrice()),
-                book.getYear(),
-                book.getPages(),
+                book.getBorrowerCount(),
+                book.getBookCondition(),
+                book.getContentRelevance(),
+                book.getLoanDuration() + " hari",
                 String.format("%.3f", spkScore)
             };
             spkTableModel.addRow(row);
@@ -362,14 +422,16 @@ public class SPKFrame extends JFrame {
         spkPanel.revalidate();
         spkPanel.repaint();
         
-        // Ensure divider stays at 50%
-        SwingUtilities.invokeLater(() -> {
-            Container parent = spkPanel.getParent();
-            if (parent instanceof JSplitPane) {
-                JSplitPane splitPane = (JSplitPane) parent;
-                splitPane.setDividerLocation(0.5);
-            }
-        });
+        // Ensure divider stays at 50% only if criteria is visible
+        if (criteriaVisible) {
+            SwingUtilities.invokeLater(() -> {
+                Container parent = spkPanel.getParent();
+                if (parent instanceof JSplitPane) {
+                    JSplitPane splitPane = (JSplitPane) parent;
+                    splitPane.setDividerLocation(0.5);
+                }
+            });
+        }
     }
     
     // Helper methods to find sliders and labels safely

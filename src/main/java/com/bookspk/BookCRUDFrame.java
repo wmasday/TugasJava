@@ -20,11 +20,18 @@ public class BookCRUDFrame extends JFrame {
     private DefaultTableModel tableModel;
     private JTextField titleField, authorField, publisherField, isbnField;
     private JTextField yearField, pagesField, ratingField, priceField;
-    private JComboBox<String> categoryComboBox;
+    private JTextField borrowerCountField, loanDurationField;
+    private JComboBox<String> categoryComboBox, bookConditionComboBox, contentRelevanceComboBox;
     private JTextArea descriptionArea;
     private JButton addButton, updateButton, deleteButton, clearButton, refreshButton;
     private JLabel statusLabel;
     private int selectedBookId = -1;
+    
+    // Toggle functionality
+    private JButton toggleDetailsButton;
+    private JSplitPane splitPane;
+    private JPanel formPanel;
+    private boolean detailsVisible = true;
     
     public BookCRUDFrame() {
         this.bookDAO = new BookDAO();
@@ -56,7 +63,7 @@ public class BookCRUDFrame extends JFrame {
         mainPanel.add(headerPanel, BorderLayout.NORTH);
         
         // Content panel with split pane
-        JSplitPane splitPane = createSplitPane();
+        splitPane = createSplitPane();
         mainPanel.add(splitPane, BorderLayout.CENTER);
         
         add(mainPanel);
@@ -78,6 +85,11 @@ public class BookCRUDFrame extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setOpaque(false);
         
+        // Toggle details button
+        toggleDetailsButton = new GradientButton("Hide Details", ColorPalette.PRIMARY_ORANGE, ColorPalette.SECONDARY_ORANGE);
+        toggleDetailsButton.setPreferredSize(new Dimension(120, 35));
+        toggleDetailsButton.addActionListener(e -> toggleDetailsPanel());
+        
         refreshButton = new GradientButton("Refresh", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
         refreshButton.setPreferredSize(new Dimension(100, 35));
         refreshButton.addActionListener(e -> loadBooks());
@@ -86,6 +98,7 @@ public class BookCRUDFrame extends JFrame {
         backButton.setPreferredSize(new Dimension(100, 35));
         backButton.addActionListener(e -> dispose());
         
+        buttonPanel.add(toggleDetailsButton);
         buttonPanel.add(refreshButton);
         buttonPanel.add(backButton);
         
@@ -100,14 +113,33 @@ public class BookCRUDFrame extends JFrame {
         JPanel leftPanel = createTablePanel();
         
         // Right panel - Form
-        JPanel rightPanel = createFormPanel();
+        formPanel = createFormPanel();
         
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
-        splitPane.setDividerLocation(600);
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, formPanel);
+        splitPane.setDividerLocation(700);
         splitPane.setDividerSize(5);
         splitPane.setBorder(BorderFactory.createLineBorder(ColorPalette.BORDER_PRIMARY, 1));
         
         return splitPane;
+    }
+    
+    private void toggleDetailsPanel() {
+        if (detailsVisible) {
+            // Hide details panel
+            splitPane.setRightComponent(null);
+            toggleDetailsButton.setText("Show Details");
+            detailsVisible = false;
+        } else {
+            // Show details panel
+            splitPane.setRightComponent(formPanel);
+            splitPane.setDividerLocation(700);
+            toggleDetailsButton.setText("Hide Details");
+            detailsVisible = true;
+        }
+        
+        // Revalidate and repaint
+        splitPane.revalidate();
+        splitPane.repaint();
     }
     
     private JPanel createTablePanel() {
@@ -121,8 +153,8 @@ public class BookCRUDFrame extends JFrame {
         tableTitle.setForeground(ColorPalette.TEXT_PRIMARY);
         panel.add(tableTitle, BorderLayout.NORTH);
         
-        // Table
-        String[] columnNames = {"Title", "Author", "Category", "Publisher", "Year", "Pages", "Rating", "Price", "ISBN"};
+        // Table with new SPK criteria columns
+        String[] columnNames = {"Title", "Author", "Category", "Publisher", "Year", "Pages", "Rating", "Price", "ISBN", "Borrower Count", "Book Condition", "Content Relevance", "Loan Duration"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -167,9 +199,15 @@ public class BookCRUDFrame extends JFrame {
         formTitle.setForeground(ColorPalette.TEXT_PRIMARY);
         panel.add(formTitle, BorderLayout.NORTH);
         
-        // Form content
+        // Form content wrapped in scroll pane
         JPanel formContent = createFormContent();
-        panel.add(formContent, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(formContent);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createLineBorder(ColorPalette.BORDER_PRIMARY, 1));
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        
+        panel.add(scrollPane, BorderLayout.CENTER);
         
         // Buttons panel
         JPanel buttonPanel = createButtonPanel();
@@ -214,12 +252,34 @@ public class BookCRUDFrame extends JFrame {
         // ISBN
         addFormField(panel, "ISBN:", isbnField = new JTextField(20), gbc, 8);
         
+        // SPK Criteria Section
+        JLabel spkLabel = new JLabel("SPK Criteria:");
+        spkLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        spkLabel.setForeground(ColorPalette.TEXT_PRIMARY);
+        gbc.gridx = 0;
+        gbc.gridy = 9;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(spkLabel, gbc);
+        
+        // Borrower Count
+        addFormField(panel, "Jumlah Peminjam:", borrowerCountField = new JTextField(20), gbc, 10);
+        
+        // Book Condition
+        addComboBoxField(panel, "Kondisi Fisik Buku:", createBookConditionComboBox(), gbc, 11);
+        
+        // Content Relevance
+        addComboBoxField(panel, "Relevansi Isi Buku:", createContentRelevanceComboBox(), gbc, 12);
+        
+        // Loan Duration
+        addFormField(panel, "Durasi Peminjaman (hari):", loanDurationField = new JTextField(20), gbc, 13);
+        
         // Description
         JLabel descLabel = new JLabel("Description:");
         descLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         descLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
-        gbc.gridy = 9;
+        gbc.gridy = 14;
         gbc.gridwidth = 1;
         panel.add(descLabel, gbc);
         
@@ -235,7 +295,7 @@ public class BookCRUDFrame extends JFrame {
         JScrollPane descScrollPane = new JScrollPane(descriptionArea);
         descScrollPane.setPreferredSize(new Dimension(250, 100));
         gbc.gridx = 1;
-        gbc.gridy = 9;
+        gbc.gridy = 14;
         gbc.gridwidth = 1;
         panel.add(descScrollPane, gbc);
         
@@ -245,7 +305,7 @@ public class BookCRUDFrame extends JFrame {
         statusLabel.setForeground(ColorPalette.ERROR);
         statusLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridx = 0;
-        gbc.gridy = 10;
+        gbc.gridy = 15;
         gbc.gridwidth = 2;
         panel.add(statusLabel, gbc);
         
@@ -265,6 +325,46 @@ public class BookCRUDFrame extends JFrame {
         loadCategories();
         
         return categoryComboBox;
+    }
+    
+    private JComboBox<String> createBookConditionComboBox() {
+        bookConditionComboBox = new JComboBox<>();
+        bookConditionComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        bookConditionComboBox.setPreferredSize(new Dimension(250, 35));
+        bookConditionComboBox.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ColorPalette.BORDER_PRIMARY, 1),
+            new EmptyBorder(8, 12, 8, 12)
+        ));
+        
+        // Add book condition options
+        bookConditionComboBox.addItem("Select Condition");
+        bookConditionComboBox.addItem("Rusak Berat");
+        bookConditionComboBox.addItem("Rusak Ringan");
+        bookConditionComboBox.addItem("Sedikit Baik");
+        bookConditionComboBox.addItem("Baik");
+        bookConditionComboBox.addItem("Sangat Baik");
+        
+        return bookConditionComboBox;
+    }
+    
+    private JComboBox<String> createContentRelevanceComboBox() {
+        contentRelevanceComboBox = new JComboBox<>();
+        contentRelevanceComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        contentRelevanceComboBox.setPreferredSize(new Dimension(250, 35));
+        contentRelevanceComboBox.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ColorPalette.BORDER_PRIMARY, 1),
+            new EmptyBorder(8, 12, 8, 12)
+        ));
+        
+        // Add content relevance options
+        contentRelevanceComboBox.addItem("Select Relevance");
+        contentRelevanceComboBox.addItem("Tidak Relevan");
+        contentRelevanceComboBox.addItem("Kurang Relevan");
+        contentRelevanceComboBox.addItem("Cukup Relevan");
+        contentRelevanceComboBox.addItem("Relevan");
+        contentRelevanceComboBox.addItem("Sangat Relevan");
+        
+        return contentRelevanceComboBox;
     }
     
     private void loadCategories() {
@@ -359,7 +459,11 @@ public class BookCRUDFrame extends JFrame {
                 book.getPages(),
                 String.format("%.1f", book.getRating()),
                 String.format("Rp %.0f", book.getPrice()),
-                book.getIsbn()
+                book.getIsbn(),
+                book.getBorrowerCount(),
+                book.getBookCondition(),
+                book.getContentRelevance(),
+                book.getLoanDuration() + " hari"
             };
             tableModel.addRow(row);
         }
@@ -384,9 +488,13 @@ public class BookCRUDFrame extends JFrame {
             publisherField.setText(book.getPublisher());
             yearField.setText(String.valueOf(book.getYear()));
             pagesField.setText(String.valueOf(book.getPages()));
-            ratingField.setText(String.valueOf(book.getRating())); // Use simple string conversion
+            ratingField.setText(String.valueOf(book.getRating()));
             priceField.setText(String.valueOf(book.getPrice()));
             isbnField.setText(book.getIsbn());
+            borrowerCountField.setText(String.valueOf(book.getBorrowerCount()));
+            bookConditionComboBox.setSelectedItem(book.getBookCondition());
+            contentRelevanceComboBox.setSelectedItem(book.getContentRelevance());
+            loanDurationField.setText(String.valueOf(book.getLoanDuration()));
             descriptionArea.setText(book.getDescription());
             
             showStatus("Book selected for editing", ColorPalette.INFO);
@@ -404,16 +512,14 @@ public class BookCRUDFrame extends JFrame {
         if (bookDAO.addBook(book)) {
             showStatus("Book added successfully", ColorPalette.SUCCESS);
             loadBooks();
-            loadCategories(); // Refresh categories
-            clearForm();
         } else {
-            showStatus("Failed to add book", ColorPalette.ERROR);
+            showStatus("Error: Failed to add book", ColorPalette.ERROR);
         }
     }
     
     private void updateBook() {
         if (selectedBookId == -1) {
-            showStatus("Please select a book to update", ColorPalette.WARNING);
+            showStatus("Please select a book to update", ColorPalette.ERROR);
             return;
         }
         
@@ -427,130 +533,185 @@ public class BookCRUDFrame extends JFrame {
         if (bookDAO.updateBook(book)) {
             showStatus("Book updated successfully", ColorPalette.SUCCESS);
             loadBooks();
-            loadCategories(); // Refresh categories
-            clearForm();
+            selectedBookId = -1;
         } else {
-            showStatus("Failed to update book", ColorPalette.ERROR);
+            showStatus("Error: Failed to update book", ColorPalette.ERROR);
         }
     }
     
     private void deleteBook() {
         if (selectedBookId == -1) {
-            showStatus("Please select a book to delete", ColorPalette.WARNING);
+            showStatus("Please select a book to delete", ColorPalette.ERROR);
             return;
         }
         
-        int choice = JOptionPane.showConfirmDialog(
+        int result = JOptionPane.showConfirmDialog(
             this,
             "Are you sure you want to delete this book?",
             "Confirm Delete",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.QUESTION_MESSAGE
+            JOptionPane.YES_NO_OPTION
         );
         
-        if (choice == JOptionPane.YES_OPTION) {
+        if (result == JOptionPane.YES_OPTION) {
             if (bookDAO.deleteBook(selectedBookId)) {
                 showStatus("Book deleted successfully", ColorPalette.SUCCESS);
                 loadBooks();
-                clearForm();
+                selectedBookId = -1;
             } else {
-                showStatus("Failed to delete book", ColorPalette.ERROR);
+                showStatus("Error: Failed to delete book", ColorPalette.ERROR);
             }
         }
     }
     
     private void clearForm() {
-        selectedBookId = -1;
         titleField.setText("");
         authorField.setText("");
-        categoryComboBox.setSelectedIndex(0); // Reset to "Select Category"
+        categoryComboBox.setSelectedIndex(0);
         publisherField.setText("");
         yearField.setText("");
         pagesField.setText("");
         ratingField.setText("");
         priceField.setText("");
         isbnField.setText("");
+        borrowerCountField.setText("");
+        bookConditionComboBox.setSelectedIndex(0);
+        contentRelevanceComboBox.setSelectedIndex(0);
+        loanDurationField.setText("");
         descriptionArea.setText("");
-        statusLabel.setText("");
+        selectedBookId = -1;
+        showStatus("Form cleared", ColorPalette.INFO);
     }
     
     private Book createBookFromForm() {
-        Book book = new Book();
-        book.setTitle(titleField.getText().trim());
-        book.setAuthor(authorField.getText().trim());
-        book.setCategory((String) categoryComboBox.getSelectedItem());
-        book.setPublisher(publisherField.getText().trim());
-        book.setYear(Integer.parseInt(yearField.getText().trim()));
-        book.setPages(Integer.parseInt(pagesField.getText().trim()));
-        book.setRating(Double.parseDouble(ratingField.getText().trim()));
-        book.setPrice(Double.parseDouble(priceField.getText().trim()));
-        book.setIsbn(isbnField.getText().trim());
-        book.setDescription(descriptionArea.getText().trim());
+        Book book = new Book(
+            titleField.getText(),
+            authorField.getText(),
+            categoryComboBox.getSelectedItem().toString(),
+            publisherField.getText(),
+            Integer.parseInt(yearField.getText()),
+            Integer.parseInt(pagesField.getText()),
+            Double.parseDouble(ratingField.getText()),
+            Double.parseDouble(priceField.getText()),
+            isbnField.getText(),
+            descriptionArea.getText()
+        );
+        
+        // Set SPK criteria fields
+        book.setBorrowerCount(Integer.parseInt(borrowerCountField.getText()));
+        book.setBookCondition(bookConditionComboBox.getSelectedItem().toString());
+        book.setContentRelevance(contentRelevanceComboBox.getSelectedItem().toString());
+        book.setLoanDuration(Integer.parseInt(loanDurationField.getText()));
+        
         return book;
     }
     
     private boolean validateForm() {
+        // Check if required fields are filled
         if (titleField.getText().trim().isEmpty()) {
-            showStatus("Title is required", ColorPalette.ERROR);
+            showStatus("Error: Title is required", ColorPalette.ERROR);
             return false;
         }
         
         if (authorField.getText().trim().isEmpty()) {
-            showStatus("Author is required", ColorPalette.ERROR);
+            showStatus("Error: Author is required", ColorPalette.ERROR);
             return false;
         }
         
-        if (categoryComboBox.getSelectedItem() == null || 
-            categoryComboBox.getSelectedItem().equals("Select Category")) {
-            showStatus("Please select a category", ColorPalette.ERROR);
+        if (categoryComboBox.getSelectedIndex() == 0) {
+            showStatus("Error: Please select a category", ColorPalette.ERROR);
             return false;
         }
         
-        // Validate Year
+        if (publisherField.getText().trim().isEmpty()) {
+            showStatus("Error: Publisher is required", ColorPalette.ERROR);
+            return false;
+        }
+        
+        // Validate numeric fields
         try {
-            int year = Integer.parseInt(yearField.getText().trim());
+            int year = Integer.parseInt(yearField.getText());
             if (year < 1900 || year > 2024) {
-                showStatus("Year must be between 1900 and 2024", ColorPalette.ERROR);
+                showStatus("Error: Year must be between 1900 and 2024", ColorPalette.ERROR);
                 return false;
             }
         } catch (NumberFormatException e) {
-            showStatus("Please enter a valid year (e.g., 2023)", ColorPalette.ERROR);
+            showStatus("Error: Year must be a valid number", ColorPalette.ERROR);
             return false;
         }
         
-        // Validate Pages
         try {
-            int pages = Integer.parseInt(pagesField.getText().trim());
-            if (pages <= 0) {
-                showStatus("Pages must be greater than 0", ColorPalette.ERROR);
+            int pages = Integer.parseInt(pagesField.getText());
+            if (pages <= 0 || pages > 5000) {
+                showStatus("Error: Pages must be between 1 and 5000", ColorPalette.ERROR);
                 return false;
             }
         } catch (NumberFormatException e) {
-            showStatus("Please enter a valid number of pages", ColorPalette.ERROR);
+            showStatus("Error: Pages must be a valid number", ColorPalette.ERROR);
             return false;
         }
         
-        // Validate Rating
         try {
-            double rating = Double.parseDouble(ratingField.getText().trim());
+            double rating = Double.parseDouble(ratingField.getText());
             if (rating < 0.0 || rating > 5.0) {
-                showStatus("Rating must be between 0.0 and 5.0", ColorPalette.ERROR);
+                showStatus("Error: Rating must be between 0.0 and 5.0", ColorPalette.ERROR);
                 return false;
             }
         } catch (NumberFormatException e) {
-            showStatus("Please enter a valid rating (e.g., 4.5)", ColorPalette.ERROR);
+            showStatus("Error: Rating must be a valid number", ColorPalette.ERROR);
             return false;
         }
         
-        // Validate Price
         try {
-            double price = Double.parseDouble(priceField.getText().trim());
+            double price = Double.parseDouble(priceField.getText());
             if (price < 0.0) {
-                showStatus("Price must be greater than or equal to 0", ColorPalette.ERROR);
+                showStatus("Error: Price must be a positive number", ColorPalette.ERROR);
                 return false;
             }
         } catch (NumberFormatException e) {
-            showStatus("Please enter a valid price (e.g., 150000)", ColorPalette.ERROR);
+            showStatus("Error: Price must be a valid number", ColorPalette.ERROR);
+            return false;
+        }
+        
+        if (isbnField.getText().trim().isEmpty()) {
+            showStatus("Error: ISBN is required", ColorPalette.ERROR);
+            return false;
+        }
+        
+        if (isbnField.getText().length() < 10) {
+            showStatus("Error: ISBN must be at least 10 characters", ColorPalette.ERROR);
+            return false;
+        }
+        
+        // Validate SPK criteria fields
+        try {
+            int borrowerCount = Integer.parseInt(borrowerCountField.getText());
+            if (borrowerCount < 0 || borrowerCount > 1000) {
+                showStatus("Error: Borrower count must be between 0 and 1000", ColorPalette.ERROR);
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showStatus("Error: Borrower count must be a valid number", ColorPalette.ERROR);
+            return false;
+        }
+        
+        if (bookConditionComboBox.getSelectedIndex() == 0) {
+            showStatus("Error: Please select a book condition", ColorPalette.ERROR);
+            return false;
+        }
+        
+        if (contentRelevanceComboBox.getSelectedIndex() == 0) {
+            showStatus("Error: Please select content relevance", ColorPalette.ERROR);
+            return false;
+        }
+        
+        try {
+            int loanDuration = Integer.parseInt(loanDurationField.getText());
+            if (loanDuration < 1 || loanDuration > 30) {
+                showStatus("Error: Loan duration must be between 1 and 30 days", ColorPalette.ERROR);
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            showStatus("Error: Loan duration must be a valid number", ColorPalette.ERROR);
             return false;
         }
         

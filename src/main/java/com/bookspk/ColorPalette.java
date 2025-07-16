@@ -42,6 +42,7 @@ public class ColorPalette {
     public static final Color BACKGROUND_PRIMARY = new Color(248, 250, 252); // #F8FAFC
     public static final Color BACKGROUND_SECONDARY = new Color(255, 255, 255); // #FFFFFF
     public static final Color BACKGROUND_TERTIARY = new Color(241, 245, 249); // #F1F5F9
+    public static final Color CARD_BACKGROUND = new Color(255, 255, 255); // #FFFFFF
 
     // Text Colors - High Contrast
     public static final Color TEXT_PRIMARY = new Color(15, 23, 42); // #0F172A

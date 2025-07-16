@@ -34,7 +34,11 @@ public class BookDAO {
                     rs.getDouble("price"),
                     rs.getString("isbn"),
                     rs.getString("description"),
-                    rs.getTimestamp("created_at")
+                    rs.getTimestamp("created_at"),
+                    rs.getInt("borrower_count"),
+                    rs.getString("book_condition"),
+                    rs.getString("content_relevance"),
+                    rs.getInt("loan_duration")
                 );
                 books.add(book);
             }
@@ -72,7 +76,11 @@ public class BookDAO {
                         rs.getDouble("price"),
                         rs.getString("isbn"),
                         rs.getString("description"),
-                        rs.getTimestamp("created_at")
+                        rs.getTimestamp("created_at"),
+                        rs.getInt("borrower_count"),
+                        rs.getString("book_condition"),
+                        rs.getString("content_relevance"),
+                        rs.getInt("loan_duration")
                     );
                     books.add(book);
                 }
@@ -110,7 +118,7 @@ public class BookDAO {
      * @return true if successful, false otherwise
      */
     public boolean addBook(Book book) {
-        String sql = "INSERT INTO books (title, author, category, publisher, year, pages, rating, price, isbn, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO books (title, author, category, publisher, year, pages, rating, price, isbn, description, borrower_count, book_condition, content_relevance, loan_duration) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -125,6 +133,10 @@ public class BookDAO {
             pstmt.setDouble(8, book.getPrice());
             pstmt.setString(9, book.getIsbn());
             pstmt.setString(10, book.getDescription());
+            pstmt.setInt(11, book.getBorrowerCount());
+            pstmt.setString(12, book.getBookCondition());
+            pstmt.setString(13, book.getContentRelevance());
+            pstmt.setInt(14, book.getLoanDuration());
             
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
@@ -141,7 +153,7 @@ public class BookDAO {
      * @return true if successful, false otherwise
      */
     public boolean updateBook(Book book) {
-        String sql = "UPDATE books SET title = ?, author = ?, category = ?, publisher = ?, year = ?, pages = ?, rating = ?, price = ?, isbn = ?, description = ? WHERE id = ?";
+        String sql = "UPDATE books SET title = ?, author = ?, category = ?, publisher = ?, year = ?, pages = ?, rating = ?, price = ?, isbn = ?, description = ?, borrower_count = ?, book_condition = ?, content_relevance = ?, loan_duration = ? WHERE id = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -156,7 +168,11 @@ public class BookDAO {
             pstmt.setDouble(8, book.getPrice());
             pstmt.setString(9, book.getIsbn());
             pstmt.setString(10, book.getDescription());
-            pstmt.setInt(11, book.getId());
+            pstmt.setInt(11, book.getBorrowerCount());
+            pstmt.setString(12, book.getBookCondition());
+            pstmt.setString(13, book.getContentRelevance());
+            pstmt.setInt(14, book.getLoanDuration());
+            pstmt.setInt(15, book.getId());
             
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
@@ -216,7 +232,11 @@ public class BookDAO {
                         rs.getDouble("price"),
                         rs.getString("isbn"),
                         rs.getString("description"),
-                        rs.getTimestamp("created_at")
+                        rs.getTimestamp("created_at"),
+                        rs.getInt("borrower_count"),
+                        rs.getString("book_condition"),
+                        rs.getString("content_relevance"),
+                        rs.getInt("loan_duration")
                     );
                 }
             }
@@ -255,7 +275,11 @@ public class BookDAO {
                         rs.getDouble("price"),
                         rs.getString("isbn"),
                         rs.getString("description"),
-                        rs.getTimestamp("created_at")
+                        rs.getTimestamp("created_at"),
+                        rs.getInt("borrower_count"),
+                        rs.getString("book_condition"),
+                        rs.getString("content_relevance"),
+                        rs.getInt("loan_duration")
                     );
                 }
             }
@@ -290,9 +314,9 @@ public class BookDAO {
     }
     
     /**
-     * Get top books using SPK (Simple Additive Weighting)
+     * Get top books using SPK (Simple Additive Weighting) with new criteria
      * @param limit number of top books to return
-     * @param weights array of weights for criteria [rating, price, year, pages]
+     * @param weights array of weights for criteria [borrowerCount, bookCondition, contentRelevance, loanDuration]
      * @return List of BookSPKResult objects
      */
     public List<BookSPKResult> getTopBooksSPK(int limit, double[] weights) {
@@ -327,25 +351,97 @@ public class BookDAO {
     }
     
     /**
-     * Calculate SPK score for a book
+     * Calculate SPK score for a book using new criteria
      * @param book Book object
-     * @param weights array of weights for criteria
+     * @param weights array of weights for criteria [borrowerCount, bookCondition, contentRelevance, loanDuration]
      * @return SPK score
      */
     private double calculateSPKScore(Book book, double[] weights) {
-        // Normalize values (0-1 scale)
-        double normalizedRating = book.getRating() / 5.0; // Rating is 0-5
-        double normalizedPrice = 1.0 - (book.getPrice() / 1000000.0); // Price is 0-1M, lower is better
-        double normalizedYear = (book.getYear() - 1900) / (2024 - 1900); // Year is 1900-2024
-        double normalizedPages = book.getPages() / 1000.0; // Pages is 0-1000
+        // Calculate normalized scores for each criterion (0-1 scale)
+        
+        // 1. Jumlah Peminjam (Borrower Count) - Higher is better
+        double normalizedBorrowerCount = calculateBorrowerCountScore(book.getBorrowerCount());
+        
+        // 2. Kondisi Fisik Buku (Book Condition) - Higher is better
+        double normalizedBookCondition = calculateBookConditionScore(book.getBookCondition());
+        
+        // 3. Relevansi Isi Buku (Content Relevance) - Higher is better
+        double normalizedContentRelevance = calculateContentRelevanceScore(book.getContentRelevance());
+        
+        // 4. Durasi Peminjaman (Loan Duration) - Lower is better (shorter duration is preferred)
+        double normalizedLoanDuration = calculateLoanDurationScore(book.getLoanDuration());
         
         // Calculate weighted sum
-        double score = (normalizedRating * weights[0]) +
-                     (normalizedPrice * weights[1]) +
-                     (normalizedYear * weights[2]) +
-                     (normalizedPages * weights[3]);
+        double score = (normalizedBorrowerCount * weights[0]) +
+                     (normalizedBookCondition * weights[1]) +
+                     (normalizedContentRelevance * weights[2]) +
+                     (normalizedLoanDuration * weights[3]);
         
         return score;
+    }
+    
+    /**
+     * Calculate borrower count score based on ranges
+     * @param borrowerCount number of borrowers
+     * @return normalized score (0-1)
+     */
+    private double calculateBorrowerCountScore(int borrowerCount) {
+        if (borrowerCount >= 1 && borrowerCount <= 20) return 0.2; // Bobot 1
+        else if (borrowerCount >= 21 && borrowerCount <= 40) return 0.4; // Bobot 2
+        else if (borrowerCount >= 41 && borrowerCount <= 60) return 0.6; // Bobot 3
+        else if (borrowerCount >= 61 && borrowerCount <= 80) return 0.8; // Bobot 4
+        else if (borrowerCount >= 81 && borrowerCount <= 100) return 1.0; // Bobot 5
+        else return 0.0; // Default for out of range
+    }
+    
+    /**
+     * Calculate book condition score
+     * @param bookCondition condition of the book
+     * @return normalized score (0-1)
+     */
+    private double calculateBookConditionScore(String bookCondition) {
+        if (bookCondition == null) return 0.0;
+        
+        switch (bookCondition.toLowerCase()) {
+            case "rusak berat": return 0.2; // Bobot 1
+            case "rusak ringan": return 0.4; // Bobot 2
+            case "sedikit baik": return 0.6; // Bobot 3
+            case "baik": return 0.8; // Bobot 4
+            case "sangat baik": return 1.0; // Bobot 5
+            default: return 0.0;
+        }
+    }
+    
+    /**
+     * Calculate content relevance score
+     * @param contentRelevance relevance of the book content
+     * @return normalized score (0-1)
+     */
+    private double calculateContentRelevanceScore(String contentRelevance) {
+        if (contentRelevance == null) return 0.0;
+        
+        switch (contentRelevance.toLowerCase()) {
+            case "tidak relevan": return 0.2; // Bobot 1
+            case "kurang relevan": return 0.4; // Bobot 2
+            case "cukup relevan": return 0.6; // Bobot 3
+            case "relevan": return 0.8; // Bobot 4
+            case "sangat relevan": return 1.0; // Bobot 5
+            default: return 0.0;
+        }
+    }
+    
+    /**
+     * Calculate loan duration score (shorter duration is better)
+     * @param loanDuration duration in days
+     * @return normalized score (0-1)
+     */
+    private double calculateLoanDurationScore(int loanDuration) {
+        if (loanDuration < 3) return 1.0; // Sangat Singkat - Bobot 5
+        else if (loanDuration >= 3 && loanDuration <= 6) return 0.8; // Singkat - Bobot 4
+        else if (loanDuration >= 7 && loanDuration <= 10) return 0.6; // Sedang - Bobot 3
+        else if (loanDuration >= 11 && loanDuration <= 14) return 0.4; // Lama - Bobot 2
+        else if (loanDuration > 14) return 0.2; // Sangat Lama - Bobot 1
+        else return 0.0; // Default
     }
     
     /**

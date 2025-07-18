@@ -324,9 +324,29 @@ public class SPKFrame extends JFrame {
             calculateSPK(selectedCount != null ? selectedCount : 5);
         });
         
+        // Print to PDF button
+        JButton printPDFButton = new GradientButton("Print to PDF", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
+        printPDFButton.setPreferredSize(new Dimension(130, 30));
+        printPDFButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save SPK Results as PDF");
+            fileChooser.setSelectedFile(new java.io.File("SPK_Results.pdf"));
+            int userSelection = fileChooser.showSaveDialog(this);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                java.io.File fileToSave = fileChooser.getSelectedFile();
+                try {
+                    PDFExportUtil.exportTableToPDF(spkTable, "SPK Analysis Results", fileToSave);
+                    JOptionPane.showMessageDialog(this, "PDF exported successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Failed to export PDF: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        
         filterPanel.add(filterLabel);
         filterPanel.add(resultCountCombo);
         filterPanel.add(refreshButton);
+        filterPanel.add(printPDFButton);
         
         topPanel.add(titleLabel, BorderLayout.WEST);
         topPanel.add(filterPanel, BorderLayout.EAST);

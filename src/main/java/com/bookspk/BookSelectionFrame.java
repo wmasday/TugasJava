@@ -145,9 +145,29 @@ public class BookSelectionFrame extends JFrame {
         refreshButton.setPreferredSize(new Dimension(100, 30));
         refreshButton.addActionListener(e -> loadBooks());
         
+        // Print to PDF button
+        JButton printPDFButton = new GradientButton("Print to PDF", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
+        printPDFButton.setPreferredSize(new Dimension(130, 30));
+        printPDFButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save All Books as PDF");
+            fileChooser.setSelectedFile(new java.io.File("All_Books.pdf"));
+            int userSelection = fileChooser.showSaveDialog(this);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                java.io.File fileToSave = fileChooser.getSelectedFile();
+                try {
+                    PDFExportUtil.exportTableToPDF(bookTable, "All Books", fileToSave);
+                    JOptionPane.showMessageDialog(this, "PDF exported successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Failed to export PDF: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        
         filterPanel.add(categoryLabel);
         filterPanel.add(categoryComboBox);
         filterPanel.add(refreshButton);
+        filterPanel.add(printPDFButton);
         
         // Table with new SPK criteria columns
         String[] columnNames = {"Title", "Author", "Category", "Publisher", "Year", "Pages", "Rating", "Price", "ISBN", "Borrower Count", "Book Condition", "Content Relevance", "Loan Duration"};

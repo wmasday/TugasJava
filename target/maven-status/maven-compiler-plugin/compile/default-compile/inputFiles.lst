@@ -1,6 +1,7 @@
 /Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/EditProfileFrame.java
 /Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/User.java
 /Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/BookDAO.java
+/Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/CriteriaDAO.java
 /Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/SPKFrame.java
 /Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/BookCRUDFrame.java
 /Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/LoginApplication.java
@@ -12,5 +13,7 @@
 /Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/Book.java
 /Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/DatabaseConnection.java
 /Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/GradientButton.java
+/Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/Criteria.java
 /Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/MainApplicationFrame.java
+/Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/CriteriaCRUDFrame.java
 /Users/muhammadhidayat/Documents/Icad/TugasJava/src/main/java/com/bookspk/BookSelectionFrame.java

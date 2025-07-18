@@ -174,6 +174,220 @@ public class PDFExportUtil {
         document.close();
     }
 
+    /**
+     * Export SPK analysis with criteria, weights, and scoring table to PDF.
+     * @param table JTable containing SPK results
+     * @param file Destination PDF file
+     * @throws IOException if PDF writing fails
+     */
+    public static void exportSPKAnalysisToPDF(JTable table, File file) throws IOException {
+        PDDocument document = new PDDocument();
+        PDRectangle landscape = new PDRectangle(PDRectangle.LETTER.getHeight(), PDRectangle.LETTER.getWidth());
+        PDPage page = new PDPage(landscape);
+        document.addPage(page);
+
+        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+        float margin = 40;
+        float yStart = page.getMediaBox().getHeight() - margin;
+        float pageWidth = page.getMediaBox().getWidth();
+        float x = margin;
+        float y = yStart;
+        int fontSize = 11;
+        float lineSpacing = 16;
+
+        // Header
+        contentStream.setNonStrokingColor(0, 32, 96);
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
+        contentStream.beginText();
+        contentStream.newLineAtOffset(x, y);
+        contentStream.showText("Laporan Analisis SPK Pemilihan Buku");
+        contentStream.endText();
+        y -= lineSpacing + 8;
+
+        // Tanggal
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd MMMM yyyy HH:mm", new java.util.Locale("id"));
+        String dateStr = sdf.format(new java.util.Date());
+        contentStream.setFont(PDType1Font.HELVETICA, 10);
+        contentStream.setNonStrokingColor(80, 80, 80);
+        contentStream.beginText();
+        contentStream.newLineAtOffset(x, y);
+        contentStream.showText("Tanggal ekspor: " + dateStr);
+        contentStream.endText();
+        y -= lineSpacing + 2;
+
+        // Kriteria dan Bobot
+        contentStream.setNonStrokingColor(0, 0, 0);
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 13);
+        contentStream.beginText();
+        contentStream.newLineAtOffset(x, y);
+        contentStream.showText("Kriteria dan Bobot Penilaian:");
+        contentStream.endText();
+        y -= lineSpacing;
+        contentStream.setFont(PDType1Font.HELVETICA, fontSize);
+        String[] kriteria = {
+            "C1. Jumlah Peminjam (30%)",
+            "C2. Kategori Jenis Buku & Rating (20%)",
+            "C3. Kondisi Fisik Buku (15%)",
+            "C4. Relevansi Isi Buku (25%)",
+            "C5. Durasi Peminjaman (10%)"
+        };
+        for (String k : kriteria) {
+            contentStream.beginText();
+            contentStream.newLineAtOffset(x + 10, y);
+            contentStream.showText(k);
+            contentStream.endText();
+            y -= lineSpacing - 2;
+        }
+        y -= 4;
+        // Tabel penilaian kriteria
+        String[][] tabelKriteria = {
+            {"C1. Jumlah Peminjam", "1-20: Bobot 1", "21-40: Bobot 2", "41-60: Bobot 3", "61-80: Bobot 4", "81-100: Bobot 5"},
+            {"C2. Kategori & Rating", "Ensiklopedia, 1.0-1.9: 1", "Komik & Manga, 2.0-3.1: 2", "Non-Fiksi, 3.1-4.0: 3", "Fiksi, 4.1-4.5: 4", "Pendidikan, 4.6-5.0: 5"},
+            {"C3. Kondisi Fisik", "Rusak Berat: 1", "Rusak Ringan: 2", "Sedikit Baik: 3", "Baik: 4", "Sangat Baik: 5"},
+            {"C4. Relevansi Isi", "Tidak Relevan: 1", "Kurang Relevan: 2", "Cukup Relevan: 3", "Relevan: 4", "Sangat Relevan: 5"},
+            {"C5. Durasi Peminjaman", "<3 Hari: 1", "3-6 Hari: 2", "7-10 Hari: 3", "11-14 Hari: 4", ">14 Hari: 5"}
+        };
+        float tableX = x + 10;
+        float tableY = y;
+        float cellW = 110;
+        float cellH = 15;
+        contentStream.setFont(PDType1Font.HELVETICA, 9);
+        for (int i = 0; i < tabelKriteria.length; i++) {
+            float cx = tableX;
+            for (int j = 0; j < tabelKriteria[i].length; j++) {
+                contentStream.addRect(cx, tableY - cellH, cellW, cellH);
+                contentStream.setNonStrokingColor(255, 255, 255);
+                contentStream.fill();
+                contentStream.setNonStrokingColor(0, 0, 0);
+                contentStream.setLineWidth(0.5f);
+                contentStream.addRect(cx, tableY - cellH, cellW, cellH);
+                contentStream.stroke();
+                contentStream.beginText();
+                contentStream.newLineAtOffset(cx + 2, tableY - cellH + 4);
+                contentStream.showText(tabelKriteria[i][j]);
+                contentStream.endText();
+                cx += cellW;
+            }
+            tableY -= cellH;
+        }
+        y = tableY - 2 * lineSpacing;
+
+        // Judul hasil
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 13);
+        contentStream.beginText();
+        contentStream.newLineAtOffset(x, y);
+        contentStream.showText("Tabel Hasil Analisis SPK");
+        contentStream.endText();
+        y -= lineSpacing;
+
+        // Tabel hasil SPK (tambah kolom Keterangan Nilai, tanpa Penulis)
+        TableModel model = table.getModel();
+        int[] colIndexes = {0, 1, 3, 4, 5, 6, 7, 8}; // Peringkat, Judul, Kategori, Jumlah Peminjam, Kondisi Fisik, Relevansi, Durasi, Nilai SPK
+        String[] headers = {"Peringkat", "Judul", "Kategori", "Jumlah Peminjam", "Kondisi Fisik", "Relevansi Isi", "Durasi", "Nilai SPK", "Keterangan Nilai"};
+        float[] colWidths = {70, 140, 80, 70, 70, 70, 55, 60, 100};
+        float tableStartX = x;
+        float tableStartY = y;
+        float rowH = 14;
+        // Header row halaman pertama
+        float cxHeaderFirst = tableStartX;
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 9);
+        for (int i = 0; i < headers.length; i++) {
+            contentStream.addRect(cxHeaderFirst, tableStartY - rowH, colWidths[i], rowH);
+            contentStream.setNonStrokingColor(220, 220, 255);
+            contentStream.fill();
+            contentStream.setNonStrokingColor(0, 0, 0);
+            contentStream.setLineWidth(0.5f);
+            contentStream.addRect(cxHeaderFirst, tableStartY - rowH, colWidths[i], rowH);
+            contentStream.stroke();
+            contentStream.beginText();
+            contentStream.newLineAtOffset(cxHeaderFirst + 2, tableStartY - rowH + 3);
+            contentStream.showText(headers[i]);
+            contentStream.endText();
+            cxHeaderFirst += colWidths[i];
+        }
+        y = tableStartY - rowH;
+        // Data rows
+        contentStream.setFont(PDType1Font.HELVETICA, 9);
+        for (int row = 0; row < model.getRowCount(); row++) {
+            // Cek jika tidak cukup ruang, buat halaman baru dan tulis header tabel lagi
+            if (y < margin + 60) {
+                contentStream.close();
+                page = new PDPage(landscape);
+                document.addPage(page);
+                contentStream = new PDPageContentStream(document, page);
+                y = yStart;
+                // Tulis ulang judul tabel
+                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 13);
+                contentStream.beginText();
+                contentStream.newLineAtOffset(x, y);
+                contentStream.showText("Tabel Hasil Analisis SPK (lanjutan)");
+                contentStream.endText();
+                y -= lineSpacing;
+                // Header row halaman baru
+                float cxHeaderNext = tableStartX;
+                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 9);
+                for (int i = 0; i < headers.length; i++) {
+                    contentStream.addRect(cxHeaderNext, y - rowH, colWidths[i], rowH);
+                    contentStream.setNonStrokingColor(220, 220, 255);
+                    contentStream.fill();
+                    contentStream.setNonStrokingColor(0, 0, 0);
+                    contentStream.setLineWidth(0.5f);
+                    contentStream.addRect(cxHeaderNext, y - rowH, colWidths[i], rowH);
+                    contentStream.stroke();
+                    contentStream.beginText();
+                    contentStream.newLineAtOffset(cxHeaderNext + 2, y - rowH + 3);
+                    contentStream.showText(headers[i]);
+                    contentStream.endText();
+                    cxHeaderNext += colWidths[i];
+                }
+                y -= rowH;
+                contentStream.setFont(PDType1Font.HELVETICA, 9);
+            }
+            float cx = tableStartX;
+            for (int c = 0; c < colIndexes.length; c++) {
+                Object val = model.getValueAt(row, colIndexes[c]);
+                String text = val == null ? "" : val.toString();
+                contentStream.addRect(cx, y - rowH, colWidths[c], rowH);
+                contentStream.setNonStrokingColor(255, 255, 255);
+                contentStream.fill();
+                contentStream.setNonStrokingColor(0, 0, 0);
+                contentStream.setLineWidth(0.5f);
+                contentStream.addRect(cx, y - rowH, colWidths[c], rowH);
+                contentStream.stroke();
+                contentStream.beginText();
+                contentStream.newLineAtOffset(cx + 2, y - rowH + 3);
+                contentStream.showText(text);
+                contentStream.endText();
+                cx += colWidths[c];
+            }
+            // Tambah kolom keterangan nilai
+            String nilaiStr = model.getValueAt(row, 8) != null ? model.getValueAt(row, 8).toString() : "";
+            double nilai = 0.0;
+            try { nilai = Double.parseDouble(nilaiStr.replace(",", ".")); } catch (Exception ex) {}
+            String ket;
+            if (nilai >= 0.85) ket = "Sangat Baik";
+            else if (nilai >= 0.70) ket = "Baik";
+            else if (nilai >= 0.55) ket = "Cukup";
+            else if (nilai >= 0.40) ket = "Kurang";
+            else ket = "Sangat Kurang";
+            contentStream.addRect(cx, y - rowH, colWidths[8], rowH);
+            contentStream.setNonStrokingColor(255, 255, 255);
+            contentStream.fill();
+            contentStream.setNonStrokingColor(0, 0, 0);
+            contentStream.setLineWidth(0.5f);
+            contentStream.addRect(cx, y - rowH, colWidths[8], rowH);
+            contentStream.stroke();
+            contentStream.beginText();
+            contentStream.newLineAtOffset(cx + 2, y - rowH + 3);
+            contentStream.showText(ket);
+            contentStream.endText();
+            y -= rowH;
+        }
+        contentStream.close();
+        document.save(file);
+        document.close();
+    }
+
     // Helper to draw header
     private static void drawHeader(PDPageContentStream contentStream, String title, String dateStr, float margin, float headerY, float pageWidth) throws IOException {
         contentStream.setNonStrokingColor(0, 32, 96); // Dark blue

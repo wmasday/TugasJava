@@ -117,6 +117,22 @@ CREATE INDEX idx_books_book_condition ON books(book_condition);
 CREATE INDEX idx_books_content_relevance ON books(content_relevance);
 CREATE INDEX idx_books_loan_duration ON books(loan_duration);
 
+-- Tabel untuk kriteria SPK
+CREATE TABLE IF NOT EXISTS criteria (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    code VARCHAR(20) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    bobot FLOAT NOT NULL
+);
+
+-- Dummy data untuk tabel criteria
+INSERT INTO criteria (code, name, bobot) VALUES
+('C1', 'Jumlah Peminjaman', 0.30),
+('C2', 'Kategori Jenis Buku', 0.20),
+('C3', 'Kondisi Fisik Buku', 0.15),
+('C4', 'Relevansi Isi Buku', 0.25),
+('C5', 'Durasi Peminjaman', 0.10);
+
 -- Create a dedicated user for the application (optional)
 -- CREATE USER IF NOT EXISTS 'loginapp'@'localhost' IDENTIFIED BY 'your_password';
 -- GRANT ALL PRIVILEGES ON tugas_java.* TO 'loginapp'@'localhost';

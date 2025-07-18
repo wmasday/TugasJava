@@ -297,7 +297,7 @@ public class SPKFrame extends JFrame {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
         
-        JLabel titleLabel = new JLabel("Hasil Analisis SPK");
+        JLabel titleLabel = new JLabel("Hasil SPK");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         titleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         
@@ -305,9 +305,9 @@ public class SPKFrame extends JFrame {
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         filterPanel.setOpaque(false);
         
-        JLabel filterLabel = new JLabel("Tampilkan Teratas:");
-        filterLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        filterLabel.setForeground(ColorPalette.TEXT_PRIMARY);
+        // JLabel filterLabel = new JLabel("Tampilkan Teratas:");
+        // filterLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        // filterLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         
         // Create combo box with more options up to 100
         Integer[] resultCountOptions = {3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100};
@@ -324,29 +324,45 @@ public class SPKFrame extends JFrame {
             calculateSPK(selectedCount != null ? selectedCount : 5);
         });
         
-        // Print to PDF button
-        JButton printPDFButton = new GradientButton("Ekspor ke PDF", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
-        printPDFButton.setPreferredSize(new Dimension(130, 30));
-        printPDFButton.addActionListener(e -> {
+        // Dropdown untuk ekspor PDF
+        String[] exportOptions = {"Ekspor ke PDF", "Ekspor Analisis SPK"};
+        JComboBox<String> exportCombo = new JComboBox<>(exportOptions);
+        exportCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        exportCombo.setPreferredSize(new Dimension(170, 30));
+        JButton exportButton = new GradientButton("Export", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
+        exportButton.setPreferredSize(new Dimension(110, 30));
+        exportButton.addActionListener(e -> {
+            int selected = exportCombo.getSelectedIndex();
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle("Simpan Hasil SPK ke PDF");
-            fileChooser.setSelectedFile(new java.io.File("Hasil_SPK.pdf"));
+            if (selected == 0) {
+                fileChooser.setDialogTitle("Simpan Hasil SPK ke PDF");
+                fileChooser.setSelectedFile(new java.io.File("Hasil_SPK.pdf"));
+            } else {
+                fileChooser.setDialogTitle("Simpan Analisis SPK Lengkap ke PDF");
+                fileChooser.setSelectedFile(new java.io.File("Analisis_SPK_Lengkap.pdf"));
+            }
             int userSelection = fileChooser.showSaveDialog(this);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 java.io.File fileToSave = fileChooser.getSelectedFile();
                 try {
-                    PDFExportUtil.exportTableToPDF(spkTable, "Hasil Analisis SPK", fileToSave);
-                    JOptionPane.showMessageDialog(this, "PDF berhasil diekspor!", "Berhasil", JOptionPane.INFORMATION_MESSAGE);
+                    if (selected == 0) {
+                        PDFExportUtil.exportTableToPDF(spkTable, "Hasil Analisis SPK", fileToSave);
+                        JOptionPane.showMessageDialog(this, "PDF berhasil diekspor!", "Berhasil", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        PDFExportUtil.exportSPKAnalysisToPDF(spkTable, fileToSave);
+                        JOptionPane.showMessageDialog(this, "PDF analisis SPK berhasil diekspor!", "Berhasil", JOptionPane.INFORMATION_MESSAGE);
+                    }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(this, "Gagal mengekspor PDF: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
         
-        filterPanel.add(filterLabel);
+        // filterPanel.add(filterLabel);
         filterPanel.add(resultCountCombo);
         filterPanel.add(refreshButton);
-        filterPanel.add(printPDFButton);
+        filterPanel.add(exportCombo);
+        filterPanel.add(exportButton);
         
         topPanel.add(titleLabel, BorderLayout.WEST);
         topPanel.add(filterPanel, BorderLayout.EAST);

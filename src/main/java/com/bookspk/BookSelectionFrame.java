@@ -84,17 +84,20 @@ public class BookSelectionFrame extends JFrame {
         crudButton = new GradientButton("Manage Book", ColorPalette.PRIMARY_ORANGE, ColorPalette.SECONDARY_ORANGE);
         editProfileButton = new GradientButton("Edit Profil", ColorPalette.PRIMARY_PURPLE, ColorPalette.SECONDARY_PURPLE);
         logoutButton = new GradientButton("Keluar", ColorPalette.PRIMARY_RED, ColorPalette.SECONDARY_RED);
+        JButton manageCriteriaButton = new GradientButton("Manage Criteria", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
         
         // Customize button sizes
         spkButton.setPreferredSize(new Dimension(120, 35));
         crudButton.setPreferredSize(new Dimension(120, 35));
         editProfileButton.setPreferredSize(new Dimension(120, 35));
         logoutButton.setPreferredSize(new Dimension(100, 35));
+        manageCriteriaButton.setPreferredSize(new Dimension(140, 35));
         
         buttonPanel.add(spkButton);
         buttonPanel.add(crudButton);
         buttonPanel.add(editProfileButton);
         buttonPanel.add(logoutButton);
+        buttonPanel.add(manageCriteriaButton);
         
         headerPanel.add(welcomeLabel, BorderLayout.WEST);
         headerPanel.add(buttonPanel, BorderLayout.EAST);
@@ -104,6 +107,7 @@ public class BookSelectionFrame extends JFrame {
         crudButton.addActionListener(e -> openCRUDFrame());
         editProfileButton.addActionListener(e -> openEditProfileFrame());
         logoutButton.addActionListener(e -> logout());
+        manageCriteriaButton.addActionListener(e -> openCriteriaFrame());
         
         return headerPanel;
     }
@@ -455,6 +459,11 @@ public class BookSelectionFrame extends JFrame {
     private void openEditProfileFrame() {
         EditProfileFrame editProfileFrame = new EditProfileFrame(currentUser);
         editProfileFrame.setVisible(true);
+    }
+    
+    private void openCriteriaFrame() {
+        CriteriaCRUDFrame frame = new CriteriaCRUDFrame();
+        frame.setVisible(true);
     }
     
     private void logout() {

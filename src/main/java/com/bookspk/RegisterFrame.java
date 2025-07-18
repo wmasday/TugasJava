@@ -27,7 +27,7 @@ public class RegisterFrame extends JFrame {
     }
 
     private void initializeUI() {
-        setTitle("Book Selection SPK - Register");
+        setTitle("Daftar - Sistem SPK Pemilihan Buku");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(500, 700);
         setLocationRelativeTo(null);
@@ -49,12 +49,12 @@ public class RegisterFrame extends JFrame {
         JPanel titlePanel = new GradientPanel(ColorPalette.getCardGradient());
         titlePanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 
-        JLabel titleLabel = new JLabel("Create Account");
+        JLabel titleLabel = new JLabel("Buat Akun Baru");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
         titleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         titlePanel.add(titleLabel);
 
-        JLabel subtitleLabel = new JLabel("Join our book selection community");
+        JLabel subtitleLabel = new JLabel("Bergabunglah dengan komunitas pemilihan buku kami");
         subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         subtitleLabel.setForeground(ColorPalette.TEXT_SECONDARY);
         titlePanel.add(subtitleLabel);
@@ -131,7 +131,7 @@ public class RegisterFrame extends JFrame {
         formPanel.add(passwordField, gbc);
 
         // Confirm Password field
-        JLabel confirmPasswordLabel = new JLabel("Confirm Password:");
+        JLabel confirmPasswordLabel = new JLabel("Konfirmasi Password:");
         confirmPasswordLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         confirmPasswordLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
@@ -165,8 +165,8 @@ public class RegisterFrame extends JFrame {
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 10));
         buttonPanel.setOpaque(false);
 
-        registerButton = new GradientButton("Register", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
-        backButton = new GradientButton("Back to Login", ColorPalette.PRIMARY_GRAY, ColorPalette.SECONDARY_GRAY);
+        registerButton = new GradientButton("Daftar", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
+        backButton = new GradientButton("Kembali ke Login", ColorPalette.PRIMARY_GRAY, ColorPalette.SECONDARY_GRAY);
 
         // Customize button sizes
         registerButton.setPreferredSize(new Dimension(150, 50));
@@ -252,44 +252,44 @@ public class RegisterFrame extends JFrame {
 
         // Validation
         if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            statusLabel.setText("Please fill in all fields");
+            statusLabel.setText("Silakan isi semua field");
             statusLabel.setForeground(ColorPalette.ERROR);
             return;
         }
 
         if (username.length() < 3) {
-            statusLabel.setText("Username must be at least 3 characters");
+            statusLabel.setText("Username harus memiliki minimal 3 karakter");
             statusLabel.setForeground(ColorPalette.ERROR);
             return;
         }
 
         if (!email.contains("@")) {
-            statusLabel.setText("Please enter a valid email address");
+            statusLabel.setText("Silakan masukkan alamat email yang valid");
             statusLabel.setForeground(ColorPalette.ERROR);
             return;
         }
 
         if (password.length() < 6) {
-            statusLabel.setText("Password must be at least 6 characters");
+            statusLabel.setText("Password harus memiliki minimal 6 karakter");
             statusLabel.setForeground(ColorPalette.ERROR);
             return;
         }
 
         if (!password.equals(confirmPassword)) {
-            statusLabel.setText("Passwords do not match");
+            statusLabel.setText("Password tidak cocok");
             statusLabel.setForeground(ColorPalette.ERROR);
             return;
         }
 
         // Check if username already exists
         if (userDAO.usernameExists(username)) {
-            statusLabel.setText("Username already exists");
+            statusLabel.setText("Username sudah digunakan");
             statusLabel.setForeground(ColorPalette.ERROR);
             return;
         }
 
         // Show loading state
-        registerButton.setText("Registering...");
+        registerButton.setText("Mendaftar...");
         registerButton.setEnabled(false);
         statusLabel.setText("");
 
@@ -306,7 +306,7 @@ public class RegisterFrame extends JFrame {
                 try {
                     boolean success = get();
                     if (success) {
-                        statusLabel.setText("Registration successful! You can now login.");
+                        statusLabel.setText("Pendaftaran berhasil! Anda dapat login sekarang.");
                         statusLabel.setForeground(ColorPalette.SUCCESS);
 
                         // Clear fields
@@ -320,14 +320,14 @@ public class RegisterFrame extends JFrame {
                         timer.setRepeats(false);
                         timer.start();
                     } else {
-                        statusLabel.setText("Registration failed. Please try again.");
+                        statusLabel.setText("Pendaftaran gagal. Silakan coba lagi.");
                         statusLabel.setForeground(ColorPalette.ERROR);
                     }
                 } catch (Exception e) {
                     statusLabel.setText("Error: " + e.getMessage());
                     statusLabel.setForeground(ColorPalette.ERROR);
                 } finally {
-                    registerButton.setText("Register");
+                    registerButton.setText("Daftar");
                     registerButton.setEnabled(true);
                 }
             }

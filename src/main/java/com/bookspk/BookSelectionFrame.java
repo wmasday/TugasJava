@@ -34,7 +34,7 @@ public class BookSelectionFrame extends JFrame {
     }
     
     private void initializeUI() {
-        setTitle("Book Selection SPK System");
+        setTitle("Sistem SPK Pemilihan Buku");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
@@ -72,7 +72,7 @@ public class BookSelectionFrame extends JFrame {
         ));
         
         // Welcome label
-        welcomeLabel = new JLabel("Welcome, " + currentUser.getUsername() + "!");
+        welcomeLabel = new JLabel("Selamat Datang, " + currentUser.getUsername() + "!");
         welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         welcomeLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         
@@ -80,10 +80,10 @@ public class BookSelectionFrame extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setOpaque(false);
         
-        spkButton = new GradientButton("SPK Analysis", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
-        crudButton = new GradientButton("Manage Books", ColorPalette.PRIMARY_ORANGE, ColorPalette.SECONDARY_ORANGE);
-        editProfileButton = new GradientButton("Edit Profile", ColorPalette.PRIMARY_PURPLE, ColorPalette.SECONDARY_PURPLE);
-        logoutButton = new GradientButton("Logout", ColorPalette.PRIMARY_RED, ColorPalette.SECONDARY_RED);
+        spkButton = new GradientButton("Analisis SPK", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
+        crudButton = new GradientButton("Manage Book", ColorPalette.PRIMARY_ORANGE, ColorPalette.SECONDARY_ORANGE);
+        editProfileButton = new GradientButton("Edit Profil", ColorPalette.PRIMARY_PURPLE, ColorPalette.SECONDARY_PURPLE);
+        logoutButton = new GradientButton("Keluar", ColorPalette.PRIMARY_RED, ColorPalette.SECONDARY_RED);
         
         // Customize button sizes
         spkButton.setPreferredSize(new Dimension(120, 35));
@@ -114,7 +114,7 @@ public class BookSelectionFrame extends JFrame {
         
         // All Books Tab
         JPanel allBooksPanel = createAllBooksPanel();
-        tabbedPane.addTab("All Books", allBooksPanel);
+        tabbedPane.addTab("Semua Buku", allBooksPanel);
         
         return tabbedPane;
     }
@@ -128,12 +128,12 @@ public class BookSelectionFrame extends JFrame {
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         filterPanel.setOpaque(false);
         
-        JLabel categoryLabel = new JLabel("Filter by Category:");
+        JLabel categoryLabel = new JLabel("Filter Kategori:");
         categoryLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         categoryLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         
         categoryComboBox = new JComboBox<>();
-        categoryComboBox.addItem("All Categories");
+        categoryComboBox.addItem("Semua Kategori");
         List<String> categories = bookDAO.getAllCategories();
         for (String category : categories) {
             categoryComboBox.addItem(category);
@@ -141,25 +141,25 @@ public class BookSelectionFrame extends JFrame {
         categoryComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         categoryComboBox.setPreferredSize(new Dimension(150, 30));
         
-        JButton refreshButton = new GradientButton("Refresh", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
+        JButton refreshButton = new GradientButton("Muat Ulang", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
         refreshButton.setPreferredSize(new Dimension(100, 30));
         refreshButton.addActionListener(e -> loadBooks());
         
         // Print to PDF button
-        JButton printPDFButton = new GradientButton("Print to PDF", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
+        JButton printPDFButton = new GradientButton("Ekspor ke PDF", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
         printPDFButton.setPreferredSize(new Dimension(130, 30));
         printPDFButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle("Save All Books as PDF");
-            fileChooser.setSelectedFile(new java.io.File("All_Books.pdf"));
+            fileChooser.setDialogTitle("Simpan Semua Buku ke PDF");
+            fileChooser.setSelectedFile(new java.io.File("Semua_Buku.pdf"));
             int userSelection = fileChooser.showSaveDialog(this);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 java.io.File fileToSave = fileChooser.getSelectedFile();
                 try {
                     PDFExportUtil.exportTableToPDF(bookTable, "All Books", fileToSave);
-                    JOptionPane.showMessageDialog(this, "PDF exported successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "PDF berhasil diekspor!", "Berhasil", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, "Failed to export PDF: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Gagal mengekspor PDF: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -170,7 +170,7 @@ public class BookSelectionFrame extends JFrame {
         filterPanel.add(printPDFButton);
         
         // Table with new SPK criteria columns
-        String[] columnNames = {"Title", "Author", "Category", "Publisher", "Year", "Pages", "Rating", "Price", "ISBN", "Borrower Count", "Book Condition", "Content Relevance", "Loan Duration"};
+        String[] columnNames = {"Judul", "Penulis", "Kategori", "Penerbit", "Tahun", "Halaman", "Rating", "Harga", "ISBN", "Jumlah Peminjam", "Kondisi Fisik Buku", "Relevansi Isi Buku", "Durasi Peminjaman"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -218,12 +218,12 @@ public class BookSelectionFrame extends JFrame {
         // Find book by title and author
         Book book = bookDAO.getBookByTitleAndAuthor(title, author);
         if (book == null) {
-            JOptionPane.showMessageDialog(this, "Could not find book details", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Tidak dapat menemukan detail buku", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         
         // Create modal dialog
-        JDialog modal = new JDialog(this, "Book Details", true);
+        JDialog modal = new JDialog(this, "Detail Buku", true);
         modal.setLayout(new BorderLayout());
         modal.setSize(700, 600);
         modal.setLocationRelativeTo(this);
@@ -242,11 +242,11 @@ public class BookSelectionFrame extends JFrame {
             new EmptyBorder(15, 20, 15, 20)
         ));
         
-        JLabel titleLabel = new JLabel("Book Details");
+        JLabel titleLabel = new JLabel("Detail Buku");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         
-        JButton closeButton = new GradientButton("Close", ColorPalette.PRIMARY_GRAY, ColorPalette.SECONDARY_GRAY);
+        JButton closeButton = new GradientButton("Tutup", ColorPalette.PRIMARY_GRAY, ColorPalette.SECONDARY_GRAY);
         closeButton.setPreferredSize(new Dimension(100, 35));
         closeButton.addActionListener(e -> modal.dispose());
         
@@ -291,7 +291,7 @@ public class BookSelectionFrame extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         
         // Basic Information Section
-        JLabel basicTitleLabel = new JLabel("Basic Information");
+        JLabel basicTitleLabel = new JLabel("Informasi Dasar");
         basicTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         basicTitleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
@@ -301,34 +301,34 @@ public class BookSelectionFrame extends JFrame {
         panel.add(basicTitleLabel, gbc);
         
         // Title
-        addDetailField(panel, "Title:", book.getTitle(), gbc, 1);
+        addDetailField(panel, "Judul:", book.getTitle(), gbc, 1);
         
         // Author
-        addDetailField(panel, "Author:", book.getAuthor(), gbc, 2);
+        addDetailField(panel, "Penulis:", book.getAuthor(), gbc, 2);
         
         // Category
-        addDetailField(panel, "Category:", book.getCategory(), gbc, 3);
+        addDetailField(panel, "Kategori:", book.getCategory(), gbc, 3);
         
         // Publisher
-        addDetailField(panel, "Publisher:", book.getPublisher(), gbc, 4);
+        addDetailField(panel, "Penerbit:", book.getPublisher(), gbc, 4);
         
         // Year
-        addDetailField(panel, "Year:", String.valueOf(book.getYear()), gbc, 5);
+        addDetailField(panel, "Tahun:", String.valueOf(book.getYear()), gbc, 5);
         
         // Pages
-        addDetailField(panel, "Pages:", String.valueOf(book.getPages()), gbc, 6);
+        addDetailField(panel, "Halaman:", String.valueOf(book.getPages()), gbc, 6);
         
         // Rating
         addDetailField(panel, "Rating:", String.format("%.1f", book.getRating()), gbc, 7);
         
         // Price
-        addDetailField(panel, "Price:", String.format("Rp %.0f", book.getPrice()), gbc, 8);
+        addDetailField(panel, "Harga:", String.format("Rp %.0f", book.getPrice()), gbc, 8);
         
         // ISBN
         addDetailField(panel, "ISBN:", book.getIsbn(), gbc, 9);
         
         // SPK Criteria Section
-        JLabel spkTitleLabel = new JLabel("SPK Criteria");
+        JLabel spkTitleLabel = new JLabel("Kriteria SPK");
         spkTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         spkTitleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
@@ -350,7 +350,7 @@ public class BookSelectionFrame extends JFrame {
         addDetailField(panel, "Durasi Peminjaman:", book.getLoanDuration() + " hari", gbc, 14);
         
         // Description Section
-        JLabel descTitleLabel = new JLabel("Description");
+        JLabel descTitleLabel = new JLabel("Deskripsi");
         descTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         descTitleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
@@ -416,7 +416,7 @@ public class BookSelectionFrame extends JFrame {
         String selectedCategory = (String) categoryComboBox.getSelectedItem();
         List<Book> books;
         
-        if ("All Categories".equals(selectedCategory)) {
+        if ("Semua Kategori".equals(selectedCategory)) {
             books = bookDAO.getAllBooks();
         } else {
             books = bookDAO.getBooksByCategory(selectedCategory);
@@ -460,8 +460,8 @@ public class BookSelectionFrame extends JFrame {
     private void logout() {
         int result = JOptionPane.showConfirmDialog(
             this,
-            "Are you sure you want to logout?",
-            "Confirm Logout",
+            "Apakah Anda yakin ingin keluar?",
+            "Konfirmasi Keluar",
             JOptionPane.YES_NO_OPTION
         );
         

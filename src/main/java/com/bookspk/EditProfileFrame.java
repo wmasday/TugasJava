@@ -33,7 +33,7 @@ public class EditProfileFrame extends JFrame {
     }
     
     private void initializeUI() {
-        setTitle("Edit Profile - Book Selection SPK");
+        setTitle("Edit Profil - Sistem SPK Pemilihan Buku");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(500, 700);
         setLocationRelativeTo(null);
@@ -128,7 +128,7 @@ public class EditProfileFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         
         // Profile Information Section
-        JLabel profileTitleLabel = new JLabel("Profile Information");
+        JLabel profileTitleLabel = new JLabel("Informasi Profil");
         profileTitleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         profileTitleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
@@ -318,12 +318,12 @@ public class EditProfileFrame extends JFrame {
         String email = emailField.getText().trim();
         
         if (username.isEmpty() || email.isEmpty()) {
-            showStatus("Please fill in all fields", ColorPalette.ERROR);
+            showStatus("Silakan isi semua field", ColorPalette.ERROR);
             return;
         }
         
         if (!email.contains("@")) {
-            showStatus("Please enter a valid email address", ColorPalette.ERROR);
+            showStatus("Silakan masukkan alamat email yang valid", ColorPalette.ERROR);
             return;
         }
         
@@ -333,9 +333,9 @@ public class EditProfileFrame extends JFrame {
         
         // Save to database
         if (userDAO.updateUser(currentUser)) {
-            showStatus("Profile updated successfully!", ColorPalette.SUCCESS);
+            showStatus("Profil berhasil diperbarui!", ColorPalette.SUCCESS);
         } else {
-            showStatus("Failed to update profile", ColorPalette.ERROR);
+            showStatus("Gagal memperbarui profil", ColorPalette.ERROR);
         }
     }
     
@@ -345,22 +345,22 @@ public class EditProfileFrame extends JFrame {
         String confirmPassword = new String(confirmPasswordField.getPassword());
         
         if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
-            showStatus("Please fill in all password fields", ColorPalette.ERROR);
+            showStatus("Silakan isi semua field password", ColorPalette.ERROR);
             return;
         }
         
         if (!currentUser.getPassword().equals(currentPassword)) {
-            showStatus("Current password is incorrect", ColorPalette.ERROR);
+            showStatus("Password saat ini tidak sesuai", ColorPalette.ERROR);
             return;
         }
         
         if (!newPassword.equals(confirmPassword)) {
-            showStatus("New passwords do not match", ColorPalette.ERROR);
+            showStatus("Password baru tidak cocok", ColorPalette.ERROR);
             return;
         }
         
         if (newPassword.length() < 6) {
-            showStatus("Password must be at least 6 characters long", ColorPalette.ERROR);
+            showStatus("Password harus memiliki setidaknya 6 karakter", ColorPalette.ERROR);
             return;
         }
         
@@ -368,10 +368,10 @@ public class EditProfileFrame extends JFrame {
         currentUser.setPassword(newPassword);
         
         if (userDAO.updateUser(currentUser)) {
-            showStatus("Password changed successfully!", ColorPalette.SUCCESS);
+            showStatus("Password berhasil diubah!", ColorPalette.SUCCESS);
             clearPasswordFields();
         } else {
-            showStatus("Failed to change password", ColorPalette.ERROR);
+            showStatus("Gagal mengubah password", ColorPalette.ERROR);
         }
     }
     

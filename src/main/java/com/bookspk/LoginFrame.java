@@ -25,7 +25,7 @@ public class LoginFrame extends JFrame {
     }
     
     private void initializeUI() {
-        setTitle("Book Selection SPK - Login");
+        setTitle("Login - Sistem SPK Pemilihan Buku");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(450, 600);
         setLocationRelativeTo(null);
@@ -47,12 +47,12 @@ public class LoginFrame extends JFrame {
         JPanel titlePanel = new GradientPanel(ColorPalette.getCardGradient());
         titlePanel.setLayout(new FlowLayout(FlowLayout.CENTER));
         
-        JLabel titleLabel = new JLabel("Welcome Back");
+        JLabel titleLabel = new JLabel("Selamat Datang Kembali");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
         titleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         titlePanel.add(titleLabel);
         
-        JLabel subtitleLabel = new JLabel("Sign in to your account");
+        JLabel subtitleLabel = new JLabel("Masuk ke akun Anda");
         subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         subtitleLabel.setForeground(ColorPalette.TEXT_SECONDARY);
         titlePanel.add(subtitleLabel);
@@ -126,8 +126,8 @@ public class LoginFrame extends JFrame {
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 10));
         buttonPanel.setOpaque(false);
         
-        loginButton = new GradientButton("Login", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
-        registerButton = new GradientButton("Register", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
+        loginButton = new GradientButton("Masuk", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
+        registerButton = new GradientButton("Daftar", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
         
         // Customize button sizes
         loginButton.setPreferredSize(new Dimension(130, 45));
@@ -186,13 +186,13 @@ public class LoginFrame extends JFrame {
         String password = new String(passwordField.getPassword());
         
         if (username.isEmpty() || password.isEmpty()) {
-            statusLabel.setText("Please enter both username and password");
+            statusLabel.setText("Silakan masukkan username dan password");
             statusLabel.setForeground(ColorPalette.ERROR);
             return;
         }
         
         // Show loading state
-        loginButton.setText("Logging in...");
+        loginButton.setText("Masuk...");
         loginButton.setEnabled(false);
         statusLabel.setText("");
         
@@ -208,7 +208,7 @@ public class LoginFrame extends JFrame {
                 try {
                     User user = get();
                     if (user != null) {
-                        statusLabel.setText("Login successful!");
+                        statusLabel.setText("Login berhasil!");
                         statusLabel.setForeground(ColorPalette.SUCCESS);
                         
                         // Open main application window
@@ -216,14 +216,14 @@ public class LoginFrame extends JFrame {
                             openMainApplication(user);
                         });
                     } else {
-                        statusLabel.setText("Invalid username or password");
+                        statusLabel.setText("Username atau password tidak valid");
                         statusLabel.setForeground(ColorPalette.ERROR);
                     }
                 } catch (Exception e) {
                     statusLabel.setText("Error: " + e.getMessage());
                     statusLabel.setForeground(ColorPalette.ERROR);
                 } finally {
-                    loginButton.setText("Login");
+                    loginButton.setText("Masuk");
                     loginButton.setEnabled(true);
                 }
             }

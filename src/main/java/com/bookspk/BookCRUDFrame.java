@@ -40,7 +40,7 @@ public class BookCRUDFrame extends JFrame {
     }
     
     private void initializeUI() {
-        setTitle("Book Management - CRUD Operations");
+        setTitle("Manajemen Buku - CRUD");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
@@ -77,7 +77,7 @@ public class BookCRUDFrame extends JFrame {
             new EmptyBorder(15, 20, 15, 20)
         ));
         
-        JLabel titleLabel = new JLabel("Book Management System");
+        JLabel titleLabel = new JLabel("Sistem Manajemen Buku");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         
@@ -86,15 +86,15 @@ public class BookCRUDFrame extends JFrame {
         buttonPanel.setOpaque(false);
         
         // Toggle details button
-        toggleDetailsButton = new GradientButton("Hide Details", ColorPalette.PRIMARY_ORANGE, ColorPalette.SECONDARY_ORANGE);
+        toggleDetailsButton = new GradientButton("Hide Detail", ColorPalette.PRIMARY_ORANGE, ColorPalette.SECONDARY_ORANGE);
         toggleDetailsButton.setPreferredSize(new Dimension(120, 35));
         toggleDetailsButton.addActionListener(e -> toggleDetailsPanel());
         
-        refreshButton = new GradientButton("Refresh", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
+        refreshButton = new GradientButton("Muat Ulang", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
         refreshButton.setPreferredSize(new Dimension(100, 35));
         refreshButton.addActionListener(e -> loadBooks());
         
-        JButton backButton = new GradientButton("Back", ColorPalette.PRIMARY_GRAY, ColorPalette.SECONDARY_GRAY);
+        JButton backButton = new GradientButton("Kembali", ColorPalette.PRIMARY_GRAY, ColorPalette.SECONDARY_GRAY);
         backButton.setPreferredSize(new Dimension(100, 35));
         backButton.addActionListener(e -> dispose());
         
@@ -127,13 +127,13 @@ public class BookCRUDFrame extends JFrame {
         if (detailsVisible) {
             // Hide details panel
             splitPane.setRightComponent(null);
-            toggleDetailsButton.setText("Show Details");
+            toggleDetailsButton.setText("Show Detail");
             detailsVisible = false;
         } else {
             // Show details panel
             splitPane.setRightComponent(formPanel);
             splitPane.setDividerLocation(700);
-            toggleDetailsButton.setText("Hide Details");
+            toggleDetailsButton.setText("Hide Detail");
             detailsVisible = true;
         }
         
@@ -148,13 +148,13 @@ public class BookCRUDFrame extends JFrame {
         panel.setBorder(new EmptyBorder(15, 15, 15, 15));
         
         // Table title
-        JLabel tableTitle = new JLabel("Book List");
+        JLabel tableTitle = new JLabel("Daftar Buku");
         tableTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
         tableTitle.setForeground(ColorPalette.TEXT_PRIMARY);
         panel.add(tableTitle, BorderLayout.NORTH);
         
         // Table with new SPK criteria columns
-        String[] columnNames = {"Title", "Author", "Category", "Publisher", "Year", "Pages", "Rating", "Price", "ISBN", "Borrower Count", "Book Condition", "Content Relevance", "Loan Duration"};
+        String[] columnNames = {"Judul", "Penulis", "Kategori", "Penerbit", "Tahun", "Halaman", "Rating", "Harga", "ISBN", "Jumlah Peminjam", "Kondisi Fisik", "Relevansi Isi", "Durasi Peminjaman"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -194,7 +194,7 @@ public class BookCRUDFrame extends JFrame {
         panel.setBorder(new EmptyBorder(15, 15, 15, 15));
         
         // Form title
-        JLabel formTitle = new JLabel("Book Details");
+        JLabel formTitle = new JLabel("Detail Buku");
         formTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
         formTitle.setForeground(ColorPalette.TEXT_PRIMARY);
         panel.add(formTitle, BorderLayout.NORTH);
@@ -226,34 +226,34 @@ public class BookCRUDFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         
         // Title
-        addFormField(panel, "Title:", titleField = new JTextField(20), gbc, 0);
+        addFormField(panel, "Judul:", titleField = new JTextField(20), gbc, 0);
         
         // Author
-        addFormField(panel, "Author:", authorField = new JTextField(20), gbc, 1);
+        addFormField(panel, "Penulis:", authorField = new JTextField(20), gbc, 1);
         
         // Category
-        addComboBoxField(panel, "Category:", createCategoryComboBox(), gbc, 2);
+        addComboBoxField(panel, "Kategori:", createCategoryComboBox(), gbc, 2);
         
         // Publisher
-        addFormField(panel, "Publisher:", publisherField = new JTextField(20), gbc, 3);
+        addFormField(panel, "Penerbit:", publisherField = new JTextField(20), gbc, 3);
         
         // Year
-        addFormField(panel, "Year:", yearField = new JTextField(20), gbc, 4);
+        addFormField(panel, "Tahun:", yearField = new JTextField(20), gbc, 4);
         
         // Pages
-        addFormField(panel, "Pages:", pagesField = new JTextField(20), gbc, 5);
+        addFormField(panel, "Halaman:", pagesField = new JTextField(20), gbc, 5);
         
         // Rating
         addFormField(panel, "Rating:", ratingField = new JTextField(20), gbc, 6);
         
         // Price
-        addFormField(panel, "Price:", priceField = new JTextField(20), gbc, 7);
+        addFormField(panel, "Harga:", priceField = new JTextField(20), gbc, 7);
         
         // ISBN
         addFormField(panel, "ISBN:", isbnField = new JTextField(20), gbc, 8);
         
         // SPK Criteria Section
-        JLabel spkLabel = new JLabel("SPK Criteria:");
+        JLabel spkLabel = new JLabel("Kriteria SPK:");
         spkLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         spkLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
@@ -272,10 +272,10 @@ public class BookCRUDFrame extends JFrame {
         addComboBoxField(panel, "Relevansi Isi Buku:", createContentRelevanceComboBox(), gbc, 12);
         
         // Loan Duration
-        addFormField(panel, "Durasi Peminjaman (hari):", loanDurationField = new JTextField(20), gbc, 13);
+        addFormField(panel, "Durasi Peminjaman:", loanDurationField = new JTextField(20), gbc, 13);
         
         // Description
-        JLabel descLabel = new JLabel("Description:");
+        JLabel descLabel = new JLabel("Deskripsi:");
         descLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         descLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
@@ -337,7 +337,7 @@ public class BookCRUDFrame extends JFrame {
         ));
         
         // Add book condition options
-        bookConditionComboBox.addItem("Select Condition");
+        bookConditionComboBox.addItem("Pilih Kondisi");
         bookConditionComboBox.addItem("Rusak Berat");
         bookConditionComboBox.addItem("Rusak Ringan");
         bookConditionComboBox.addItem("Sedikit Baik");
@@ -357,7 +357,7 @@ public class BookCRUDFrame extends JFrame {
         ));
         
         // Add content relevance options
-        contentRelevanceComboBox.addItem("Select Relevance");
+        contentRelevanceComboBox.addItem("Pilih Relevansi");
         contentRelevanceComboBox.addItem("Tidak Relevan");
         contentRelevanceComboBox.addItem("Kurang Relevan");
         contentRelevanceComboBox.addItem("Cukup Relevan");
@@ -372,7 +372,7 @@ public class BookCRUDFrame extends JFrame {
         List<String> categories = bookDAO.getAllCategories();
         
         // Add default option
-        categoryComboBox.addItem("Select Category");
+        categoryComboBox.addItem("Pilih Kategori");
         
         // Add categories from database
         for (String category : categories) {
@@ -420,10 +420,10 @@ public class BookCRUDFrame extends JFrame {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         panel.setOpaque(false);
         
-        addButton = new GradientButton("Add Book", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
-        updateButton = new GradientButton("Update Book", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
-        deleteButton = new GradientButton("Delete Book", ColorPalette.PRIMARY_RED, ColorPalette.SECONDARY_RED);
-        clearButton = new GradientButton("Clear Form", ColorPalette.PRIMARY_ORANGE, ColorPalette.SECONDARY_ORANGE);
+        addButton = new GradientButton("Tambah Buku", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
+        updateButton = new GradientButton("Perbarui Buku", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
+        deleteButton = new GradientButton("Hapus Buku", ColorPalette.PRIMARY_RED, ColorPalette.SECONDARY_RED);
+        clearButton = new GradientButton("Bersihkan Form", ColorPalette.PRIMARY_ORANGE, ColorPalette.SECONDARY_ORANGE);
         
         // Customize button sizes
         addButton.setPreferredSize(new Dimension(120, 40));
@@ -469,7 +469,7 @@ public class BookCRUDFrame extends JFrame {
         }
         
         clearForm();
-        showStatus("Books loaded successfully", ColorPalette.SUCCESS);
+        showStatus("Buku berhasil dimuat", ColorPalette.SUCCESS);
     }
     
     private void loadBookToForm(int row) {
@@ -497,9 +497,9 @@ public class BookCRUDFrame extends JFrame {
             loanDurationField.setText(String.valueOf(book.getLoanDuration()));
             descriptionArea.setText(book.getDescription());
             
-            showStatus("Book selected for editing", ColorPalette.INFO);
+            showStatus("Buku dipilih untuk diedit", ColorPalette.INFO);
         } else {
-            showStatus("Error: Could not find book details", ColorPalette.ERROR);
+            showStatus("Error: Tidak dapat menemukan detail buku", ColorPalette.ERROR);
         }
     }
     
@@ -510,16 +510,16 @@ public class BookCRUDFrame extends JFrame {
         
         Book book = createBookFromForm();
         if (bookDAO.addBook(book)) {
-            showStatus("Book added successfully", ColorPalette.SUCCESS);
+            showStatus("Buku berhasil ditambahkan", ColorPalette.SUCCESS);
             loadBooks();
         } else {
-            showStatus("Error: Failed to add book", ColorPalette.ERROR);
+            showStatus("Error: Gagal menambahkan buku", ColorPalette.ERROR);
         }
     }
     
     private void updateBook() {
         if (selectedBookId == -1) {
-            showStatus("Please select a book to update", ColorPalette.ERROR);
+            showStatus("Silakan pilih buku untuk diperbarui", ColorPalette.ERROR);
             return;
         }
         
@@ -531,34 +531,34 @@ public class BookCRUDFrame extends JFrame {
         book.setId(selectedBookId);
         
         if (bookDAO.updateBook(book)) {
-            showStatus("Book updated successfully", ColorPalette.SUCCESS);
+            showStatus("Buku berhasil diperbarui", ColorPalette.SUCCESS);
             loadBooks();
             selectedBookId = -1;
         } else {
-            showStatus("Error: Failed to update book", ColorPalette.ERROR);
+            showStatus("Error: Gagal memperbarui buku", ColorPalette.ERROR);
         }
     }
     
     private void deleteBook() {
         if (selectedBookId == -1) {
-            showStatus("Please select a book to delete", ColorPalette.ERROR);
+            showStatus("Silakan pilih buku untuk dihapus", ColorPalette.ERROR);
             return;
         }
         
         int result = JOptionPane.showConfirmDialog(
             this,
-            "Are you sure you want to delete this book?",
-            "Confirm Delete",
+            "Apakah Anda yakin ingin menghapus buku ini?",
+            "Konfirmasi Hapus",
             JOptionPane.YES_NO_OPTION
         );
         
         if (result == JOptionPane.YES_OPTION) {
             if (bookDAO.deleteBook(selectedBookId)) {
-                showStatus("Book deleted successfully", ColorPalette.SUCCESS);
+                showStatus("Buku berhasil dihapus", ColorPalette.SUCCESS);
                 loadBooks();
                 selectedBookId = -1;
             } else {
-                showStatus("Error: Failed to delete book", ColorPalette.ERROR);
+                showStatus("Error: Gagal menghapus buku", ColorPalette.ERROR);
             }
         }
     }
@@ -579,7 +579,7 @@ public class BookCRUDFrame extends JFrame {
         loanDurationField.setText("");
         descriptionArea.setText("");
         selectedBookId = -1;
-        showStatus("Form cleared", ColorPalette.INFO);
+        showStatus("Form dibersihkan", ColorPalette.INFO);
     }
     
     private Book createBookFromForm() {
@@ -608,22 +608,22 @@ public class BookCRUDFrame extends JFrame {
     private boolean validateForm() {
         // Check if required fields are filled
         if (titleField.getText().trim().isEmpty()) {
-            showStatus("Error: Title is required", ColorPalette.ERROR);
+            showStatus("Error: Judul wajib diisi", ColorPalette.ERROR);
             return false;
         }
         
         if (authorField.getText().trim().isEmpty()) {
-            showStatus("Error: Author is required", ColorPalette.ERROR);
+            showStatus("Error: Penulis wajib diisi", ColorPalette.ERROR);
             return false;
         }
         
         if (categoryComboBox.getSelectedIndex() == 0) {
-            showStatus("Error: Please select a category", ColorPalette.ERROR);
+            showStatus("Error: Silakan pilih kategori", ColorPalette.ERROR);
             return false;
         }
         
         if (publisherField.getText().trim().isEmpty()) {
-            showStatus("Error: Publisher is required", ColorPalette.ERROR);
+            showStatus("Error: Penerbit wajib diisi", ColorPalette.ERROR);
             return false;
         }
         
@@ -631,54 +631,54 @@ public class BookCRUDFrame extends JFrame {
         try {
             int year = Integer.parseInt(yearField.getText());
             if (year < 1900 || year > 2024) {
-                showStatus("Error: Year must be between 1900 and 2024", ColorPalette.ERROR);
+                showStatus("Error: Tahun harus antara 1900 dan 2024", ColorPalette.ERROR);
                 return false;
             }
         } catch (NumberFormatException e) {
-            showStatus("Error: Year must be a valid number", ColorPalette.ERROR);
+            showStatus("Error: Tahun harus berupa angka valid", ColorPalette.ERROR);
             return false;
         }
         
         try {
             int pages = Integer.parseInt(pagesField.getText());
             if (pages <= 0 || pages > 5000) {
-                showStatus("Error: Pages must be between 1 and 5000", ColorPalette.ERROR);
+                showStatus("Error: Halaman harus antara 1 dan 5000", ColorPalette.ERROR);
                 return false;
             }
         } catch (NumberFormatException e) {
-            showStatus("Error: Pages must be a valid number", ColorPalette.ERROR);
+            showStatus("Error: Halaman harus berupa angka valid", ColorPalette.ERROR);
             return false;
         }
         
         try {
             double rating = Double.parseDouble(ratingField.getText());
             if (rating < 0.0 || rating > 5.0) {
-                showStatus("Error: Rating must be between 0.0 and 5.0", ColorPalette.ERROR);
+                showStatus("Error: Rating harus antara 0.0 dan 5.0", ColorPalette.ERROR);
                 return false;
             }
         } catch (NumberFormatException e) {
-            showStatus("Error: Rating must be a valid number", ColorPalette.ERROR);
+            showStatus("Error: Rating harus berupa angka valid", ColorPalette.ERROR);
             return false;
         }
         
         try {
             double price = Double.parseDouble(priceField.getText());
             if (price < 0.0) {
-                showStatus("Error: Price must be a positive number", ColorPalette.ERROR);
+                showStatus("Error: Harga harus berupa angka positif", ColorPalette.ERROR);
                 return false;
             }
         } catch (NumberFormatException e) {
-            showStatus("Error: Price must be a valid number", ColorPalette.ERROR);
+            showStatus("Error: Harga harus berupa angka valid", ColorPalette.ERROR);
             return false;
         }
         
         if (isbnField.getText().trim().isEmpty()) {
-            showStatus("Error: ISBN is required", ColorPalette.ERROR);
+            showStatus("Error: ISBN wajib diisi", ColorPalette.ERROR);
             return false;
         }
         
         if (isbnField.getText().length() < 10) {
-            showStatus("Error: ISBN must be at least 10 characters", ColorPalette.ERROR);
+            showStatus("Error: ISBN harus minimal 10 karakter", ColorPalette.ERROR);
             return false;
         }
         
@@ -686,32 +686,32 @@ public class BookCRUDFrame extends JFrame {
         try {
             int borrowerCount = Integer.parseInt(borrowerCountField.getText());
             if (borrowerCount < 0 || borrowerCount > 1000) {
-                showStatus("Error: Borrower count must be between 0 and 1000", ColorPalette.ERROR);
+                showStatus("Error: Jumlah peminjam harus antara 0 dan 1000", ColorPalette.ERROR);
                 return false;
             }
         } catch (NumberFormatException e) {
-            showStatus("Error: Borrower count must be a valid number", ColorPalette.ERROR);
+            showStatus("Error: Jumlah peminjam harus berupa angka valid", ColorPalette.ERROR);
             return false;
         }
         
         if (bookConditionComboBox.getSelectedIndex() == 0) {
-            showStatus("Error: Please select a book condition", ColorPalette.ERROR);
+            showStatus("Error: Silakan pilih kondisi fisik buku", ColorPalette.ERROR);
             return false;
         }
         
         if (contentRelevanceComboBox.getSelectedIndex() == 0) {
-            showStatus("Error: Please select content relevance", ColorPalette.ERROR);
+            showStatus("Error: Silakan pilih relevansi isi buku", ColorPalette.ERROR);
             return false;
         }
         
         try {
             int loanDuration = Integer.parseInt(loanDurationField.getText());
             if (loanDuration < 1 || loanDuration > 30) {
-                showStatus("Error: Loan duration must be between 1 and 30 days", ColorPalette.ERROR);
+                showStatus("Error: Durasi peminjaman harus antara 1 dan 30 hari", ColorPalette.ERROR);
                 return false;
             }
         } catch (NumberFormatException e) {
-            showStatus("Error: Loan duration must be a valid number", ColorPalette.ERROR);
+            showStatus("Error: Durasi peminjaman harus berupa angka valid", ColorPalette.ERROR);
             return false;
         }
         

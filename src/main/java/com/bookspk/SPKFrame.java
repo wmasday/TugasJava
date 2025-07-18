@@ -38,7 +38,7 @@ public class SPKFrame extends JFrame {
     }
     
     private void initializeUI() {
-        setTitle("SPK Analysis - Book Selection");
+        setTitle("Analisis SPK - Pemilihan Buku");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setLocationRelativeTo(null);
@@ -75,7 +75,7 @@ public class SPKFrame extends JFrame {
             new EmptyBorder(15, 20, 15, 20)
         ));
         
-        JLabel titleLabel = new JLabel("Decision Support System (SPK) Analysis");
+        JLabel titleLabel = new JLabel("Analisis Sistem Pendukung Keputusan (SPK)");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         
@@ -83,11 +83,11 @@ public class SPKFrame extends JFrame {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setOpaque(false);
         
-        toggleCriteriaButton = new GradientButton("Hide SPK Criteria", ColorPalette.PRIMARY_ORANGE, ColorPalette.SECONDARY_ORANGE);
+        toggleCriteriaButton = new GradientButton("Hide SPK", ColorPalette.PRIMARY_ORANGE, ColorPalette.SECONDARY_ORANGE);
         toggleCriteriaButton.setPreferredSize(new Dimension(150, 35));
         toggleCriteriaButton.addActionListener(e -> toggleCriteriaPanel());
         
-        backButton = new GradientButton("Back", ColorPalette.PRIMARY_GRAY, ColorPalette.SECONDARY_GRAY);
+        backButton = new GradientButton("Kembali", ColorPalette.PRIMARY_GRAY, ColorPalette.SECONDARY_GRAY);
         backButton.setPreferredSize(new Dimension(100, 35));
         backButton.addActionListener(e -> dispose());
         
@@ -143,12 +143,12 @@ public class SPKFrame extends JFrame {
         if (criteriaVisible) {
             // Hide criteria panel
             splitPane.setLeftComponent(null);
-            toggleCriteriaButton.setText("Show SPK Criteria");
+            toggleCriteriaButton.setText("Show SPK");
             criteriaVisible = false;
         } else {
             // Show criteria panel
             splitPane.setLeftComponent(criteriaScrollPane);
-            toggleCriteriaButton.setText("Hide SPK Criteria");
+            toggleCriteriaButton.setText("Hide SPK");
             criteriaVisible = true;
             
             // Reset divider location
@@ -176,7 +176,7 @@ public class SPKFrame extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         
         // Title
-        JLabel titleLabel = new JLabel("Set SPK Criteria Weights");
+        JLabel titleLabel = new JLabel("Atur Bobot Kriteria SPK");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         gbc.gridx = 0;
@@ -267,7 +267,7 @@ public class SPKFrame extends JFrame {
         panel.add(loanDurationSlider, gbc);
         
         // Calculate Button
-        calculateButton = new GradientButton("Calculate SPK", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
+        calculateButton = new GradientButton("Hitung SPK", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
         calculateButton.setPreferredSize(new Dimension(220, 50));
         calculateButton.addActionListener(e -> {
             // Get the selected count from combo box and pass it to calculateSPK
@@ -297,7 +297,7 @@ public class SPKFrame extends JFrame {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
         
-        JLabel titleLabel = new JLabel("SPK Analysis Results");
+        JLabel titleLabel = new JLabel("Hasil Analisis SPK");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         titleLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         
@@ -305,7 +305,7 @@ public class SPKFrame extends JFrame {
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         filterPanel.setOpaque(false);
         
-        JLabel filterLabel = new JLabel("Show Top:");
+        JLabel filterLabel = new JLabel("Tampilkan Teratas:");
         filterLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         filterLabel.setForeground(ColorPalette.TEXT_PRIMARY);
         
@@ -316,7 +316,7 @@ public class SPKFrame extends JFrame {
         resultCountCombo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         resultCountCombo.setPreferredSize(new Dimension(80, 30));
         
-        JButton refreshButton = new GradientButton("Refresh", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
+        JButton refreshButton = new GradientButton("Muat Ulang", ColorPalette.PRIMARY_GREEN, ColorPalette.SECONDARY_GREEN);
         refreshButton.setPreferredSize(new Dimension(100, 30));
         refreshButton.addActionListener(e -> {
             // Get the selected count from combo box and pass it to calculateSPK
@@ -325,20 +325,20 @@ public class SPKFrame extends JFrame {
         });
         
         // Print to PDF button
-        JButton printPDFButton = new GradientButton("Print to PDF", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
+        JButton printPDFButton = new GradientButton("Ekspor ke PDF", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
         printPDFButton.setPreferredSize(new Dimension(130, 30));
         printPDFButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle("Save SPK Results as PDF");
-            fileChooser.setSelectedFile(new java.io.File("SPK_Results.pdf"));
+            fileChooser.setDialogTitle("Simpan Hasil SPK ke PDF");
+            fileChooser.setSelectedFile(new java.io.File("Hasil_SPK.pdf"));
             int userSelection = fileChooser.showSaveDialog(this);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 java.io.File fileToSave = fileChooser.getSelectedFile();
                 try {
-                    PDFExportUtil.exportTableToPDF(spkTable, "SPK Analysis Results", fileToSave);
-                    JOptionPane.showMessageDialog(this, "PDF exported successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    PDFExportUtil.exportTableToPDF(spkTable, "Hasil Analisis SPK", fileToSave);
+                    JOptionPane.showMessageDialog(this, "PDF berhasil diekspor!", "Berhasil", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(this, "Failed to export PDF: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(this, "Gagal mengekspor PDF: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -352,7 +352,7 @@ public class SPKFrame extends JFrame {
         topPanel.add(filterPanel, BorderLayout.EAST);
         
         // Results table with new SPK criteria columns
-        String[] columnNames = {"Rank", "Title", "Author", "Category", "Borrower Count", "Book Condition", "Content Relevance", "Loan Duration", "SPK Score"};
+        String[] columnNames = {"Peringkat", "Judul", "Penulis", "Kategori", "Jumlah Peminjam", "Kondisi Fisik Buku", "Relevansi Isi Buku", "Durasi Peminjaman", "Nilai SPK"};
         spkTableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -383,7 +383,7 @@ public class SPKFrame extends JFrame {
         scrollPane.setPreferredSize(new Dimension(900, 500));
         
         // Status label
-        spkResultLabel = new JLabel("Click 'Calculate SPK' to see results");
+        spkResultLabel = new JLabel("Klik 'Hitung SPK' untuk melihat hasil");
         spkResultLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         spkResultLabel.setForeground(ColorPalette.TEXT_SECONDARY);
         spkResultLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -436,7 +436,7 @@ public class SPKFrame extends JFrame {
         }
         
         // Update status
-        spkResultLabel.setText(String.format("SPK Analysis completed. Showing top %d books based on your criteria preferences.", topBooks.size()));
+        spkResultLabel.setText(String.format("Analisis SPK selesai. Menampilkan buku teratas berdasarkan preferensi kriteria Anda.", topBooks.size()));
         spkResultLabel.setForeground(ColorPalette.SUCCESS);
         
         spkPanel.revalidate();

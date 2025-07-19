@@ -39,6 +39,13 @@
             <artifactId>pdfbox</artifactId>
             <version>2.0.29</version>
         </dependency>
+        
+        <!-- iText PDF for professional PDF generation -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>itextpdf</artifactId>
+            <version>5.5.13.3</version>
+        </dependency>
     </dependencies>
 
     <build>

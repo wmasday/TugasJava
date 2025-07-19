@@ -36,4 +36,15 @@ public class MainApplicationFrame extends JFrame {
         
         add(mainPanel);
     }
+
+    private void openSPKFrame() {
+        BookDAO bookDAO = new BookDAO();
+        SPKFrame spkFrame = new SPKFrame(bookDAO);
+        spkFrame.setVisible(true);
+    }
+    
+    private void openNewSPKFrame() {
+        NewSPKFrame newSPKFrame = new NewSPKFrame();
+        newSPKFrame.setVisible(true);
+    }
 } 

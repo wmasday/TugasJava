@@ -85,19 +85,26 @@ public class BookSelectionFrame extends JFrame {
         editProfileButton = new GradientButton("Edit Profil", ColorPalette.PRIMARY_PURPLE, ColorPalette.SECONDARY_PURPLE);
         logoutButton = new GradientButton("Keluar", ColorPalette.PRIMARY_RED, ColorPalette.SECONDARY_RED);
         JButton manageCriteriaButton = new GradientButton("Manage Criteria", ColorPalette.PRIMARY_BLUE, ColorPalette.SECONDARY_BLUE);
+        JButton newSPKButton = new GradientButton("Normalisasi SPK", ColorPalette.PRIMARY_PURPLE, ColorPalette.SECONDARY_PURPLE);
         
         // Customize button sizes
         spkButton.setPreferredSize(new Dimension(120, 35));
         crudButton.setPreferredSize(new Dimension(120, 35));
         editProfileButton.setPreferredSize(new Dimension(120, 35));
+        newSPKButton.setPreferredSize(new Dimension(120, 35));
         logoutButton.setPreferredSize(new Dimension(100, 35));
         manageCriteriaButton.setPreferredSize(new Dimension(140, 35));
         
-        buttonPanel.add(spkButton);
+        
+        
+        
         buttonPanel.add(crudButton);
+        buttonPanel.add(manageCriteriaButton);
+        buttonPanel.add(spkButton);
+        buttonPanel.add(newSPKButton);
         buttonPanel.add(editProfileButton);
         buttonPanel.add(logoutButton);
-        buttonPanel.add(manageCriteriaButton);
+        
         
         headerPanel.add(welcomeLabel, BorderLayout.WEST);
         headerPanel.add(buttonPanel, BorderLayout.EAST);
@@ -108,6 +115,7 @@ public class BookSelectionFrame extends JFrame {
         editProfileButton.addActionListener(e -> openEditProfileFrame());
         logoutButton.addActionListener(e -> logout());
         manageCriteriaButton.addActionListener(e -> openCriteriaFrame());
+        newSPKButton.addActionListener(e -> openNewSPKFrame());
         
         return headerPanel;
     }
@@ -449,6 +457,11 @@ public class BookSelectionFrame extends JFrame {
     private void openSPKFrame() {
         SPKFrame spkFrame = new SPKFrame(bookDAO);
         spkFrame.setVisible(true);
+    }
+    
+    private void openNewSPKFrame() {
+        NewSPKFrame newSPKFrame = new NewSPKFrame();
+        newSPKFrame.setVisible(true);
     }
     
     private void openCRUDFrame() {
